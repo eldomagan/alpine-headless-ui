@@ -1,0 +1,365 @@
+@import "tailwindcss";
+
+@variant dark (.dark &);
+
+/**
+ * Custom theme for Alpine Headless UI
+ * Supports both light and dark modes
+ */
+
+/* Override VitePress button resets for component examples */
+.component-example-preview [class*="px-"],
+.component-example-preview [class*="py-"],
+.component-example-preview [class*="p-"],
+.component-example-preview [class*="bg-"],
+.component-example-preview [class*="border-"],
+.component-example-preview [class*="text-"],
+.component-example-preview [class*="rounded-"],
+.component-example-preview [class*="w-"],
+.component-example-preview [class*="hover:"],
+.component-example-preview [class*="transition-"],
+.component-example-preview [class*="flex"],
+.component-example-preview [class*="items-"],
+.component-example-preview [class*="justify-"],
+.component-example-preview [class*="opacity-"],
+.component-example-preview [class*="cursor-"] {
+  all: revert-layer;
+}
+
+/* ============================================
+   Brand Colors
+   ============================================ */
+:root {
+  --vp-c-brand-1: #3b82f6;
+  --vp-c-brand-2: #2563eb;
+  --vp-c-brand-3: #1d4ed8;
+  --vp-c-brand-soft: rgba(59, 130, 246, 0.14);
+}
+
+/* ============================================
+   Light Mode Colors
+   ============================================ */
+:root {
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-soft: #f9fafb;
+  --vp-c-bg-mute: #f3f4f6;
+  --vp-c-bg-alt: #f9fafb;
+
+  --vp-c-border: #e5e7eb;
+  --vp-c-divider: #e5e7eb;
+  --vp-c-gutter: #f3f4f6;
+
+  --vp-c-text-1: #111827;
+  --vp-c-text-2: #4b5563;
+  --vp-c-text-3: #6b7280;
+
+  --vp-code-block-bg: #f9fafb;
+  --vp-code-bg: #f3f4f6;
+}
+
+/* ============================================
+   Dark Mode Colors
+   ============================================ */
+.dark {
+  --vp-c-bg: #0a0a0a;
+  --vp-c-bg-soft: #141414;
+  --vp-c-bg-mute: #1a1a1a;
+  --vp-c-bg-alt: #000000;
+
+  --vp-c-border: #2a2a2a;
+  --vp-c-divider: #2a2a2a;
+  --vp-c-gutter: #1a1a1a;
+
+  --vp-c-text-1: #ffffff;
+  --vp-c-text-2: #a1a1aa;
+  --vp-c-text-3: #71717a;
+
+  --vp-code-block-bg: #0f0f0f;
+  --vp-code-bg: #1a1a1a;
+}
+
+/* ============================================
+   Hero Section
+   ============================================ */
+/* Mobile: Center everything with smaller text */
+.VPHero .name {
+  font-size: 36px;
+  line-height: 1.2;
+  font-weight: 800;
+  text-align: center;
+}
+
+.VPHero .text {
+  text-align: center;
+}
+
+.VPHero .tagline {
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 600px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* Desktop: Larger text and left-align everything */
+@media (min-width: 768px) {
+  .VPHero .name {
+    font-size: 56px;
+    text-align: left;
+  }
+
+  .VPHero .text {
+    text-align: left;
+  }
+
+  .VPHero .tagline {
+    font-size: 20px;
+    text-align: left;
+    margin: 0;
+  }
+}
+
+/* ============================================
+   Feature Cards
+   ============================================ */
+.VPFeature {
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-border);
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+}
+
+.VPFeature .icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.VPFeature .title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.VPFeature .details {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--vp-c-text-2);
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.VPButton.brand {
+  background: var(--vp-c-brand-1);
+  border: none;
+  padding: 12px 28px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.VPButton.brand:hover {
+  background: var(--vp-c-brand-2);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.VPButton.alt {
+  border: 1px solid var(--vp-c-border);
+  padding: 12px 28px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: var(--vp-c-bg);
+}
+
+.VPButton.alt:hover {
+  border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+}
+
+/* ============================================
+   Navigation
+   ============================================ */
+.VPNav {
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.VPNavBar {
+  background: transparent;
+}
+
+/* ============================================
+   Sidebar
+   ============================================ */
+.VPSidebar {
+  border-right: 1px solid var(--vp-c-divider);
+}
+
+.VPSidebarItem.is-link:hover .link,
+.VPSidebarItem.is-link.is-active .link {
+  color: var(--vp-c-brand-1);
+}
+
+/* ============================================
+   Code Blocks
+   ============================================ */
+div[class*='language-'] {
+  background: var(--vp-code-block-bg);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+div[class*='language-'] code {
+  background: transparent;
+}
+
+/* ============================================
+   Custom Containers
+   ============================================ */
+.custom-block {
+  border-radius: 8px;
+  border-left-width: 4px;
+}
+
+.custom-block.tip {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+}
+
+.custom-block.warning {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: #fbbf24;
+}
+
+.custom-block.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+.custom-block.info {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.VPFooter {
+  border-top: 1px solid var(--vp-c-divider);
+  padding: 32px 24px;
+}
+
+/* ============================================
+   Search
+   ============================================ */
+.VPLocalSearchBox {
+  border: 1px solid var(--vp-c-border);
+}
+
+/* ============================================
+   Links
+   ============================================ */
+a {
+  color: var(--vp-c-brand-1);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--vp-c-brand-2);
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 20px 0;
+}
+
+th, td {
+  border: 1px solid var(--vp-c-border);
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background: var(--vp-c-bg-soft);
+  font-weight: 600;
+}
+
+tr:hover {
+  background: var(--vp-c-bg-soft);
+}
+
+/* ============================================
+   Scrollbar (Dark Mode Only)
+   ============================================ */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--vp-c-bg);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
+
+/* ============================================
+   Marquee Component Animations
+   ============================================ */
+/* Keyframe animations */
+@keyframes marqueeX {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes marqueeY {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+
+/* Animation application - users add layout classes in HTML */
+[data-scope="marquee"][data-vertical="false"] [data-part="content"] {
+  animation: marqueeX var(--marquee-duration, 40s) linear var(--marquee-iteration-count, infinite);
+  animation-delay: var(--marquee-delay, 0s);
+}
+
+[data-scope="marquee"][data-vertical="true"] [data-part="content"] {
+  animation: marqueeY var(--marquee-duration, 40s) linear var(--marquee-iteration-count, infinite);
+  animation-delay: var(--marquee-delay, 0s);
+}
+
+[data-scope="marquee"][data-reverse="true"] [data-part="content"] {
+  animation-direction: reverse;
+}
+
+[data-scope="marquee"][data-state="paused"] [data-part="content"] {
+  animation-play-state: paused;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  [data-part="content"] {
+    animation: none !important;
+  }
+}

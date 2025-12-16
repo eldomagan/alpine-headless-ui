@@ -1,0 +1,125 @@
+{
+  "name": "alpine-headless-ui",
+  "version": "0.1.0",
+  "description": "Headless, accessible UI primitives for Alpine.js",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/module.esm.js",
+      "require": "./dist/module.cjs.js"
+    },
+    "./accordion": {
+      "types": "./dist/components/accordion.d.ts",
+      "import": "./dist/accordion.esm.js",
+      "require": "./dist/accordion.cjs.js"
+    },
+    "./carousel": {
+      "types": "./dist/components/carousel.d.ts",
+      "import": "./dist/carousel.esm.js",
+      "require": "./dist/carousel.cjs.js"
+    },
+    "./clipboard": {
+      "types": "./dist/components/clipboard.d.ts",
+      "import": "./dist/clipboard.esm.js",
+      "require": "./dist/clipboard.cjs.js"
+    },
+    "./collapsible": {
+      "types": "./dist/components/collapsible.d.ts",
+      "import": "./dist/collapsible.esm.js",
+      "require": "./dist/collapsible.cjs.js"
+    },
+    "./countdown": {
+      "types": "./dist/components/countdown.d.ts",
+      "import": "./dist/countdown.esm.js",
+      "require": "./dist/countdown.cjs.js"
+    },
+    "./dialog": {
+      "types": "./dist/components/dialog.d.ts",
+      "import": "./dist/dialog.esm.js",
+      "require": "./dist/dialog.cjs.js"
+    },
+    "./image-zoom": {
+      "types": "./dist/components/image-zoom.d.ts",
+      "import": "./dist/image-zoom.esm.js",
+      "require": "./dist/image-zoom.cjs.js"
+    },
+    "./marquee": {
+      "types": "./dist/components/marquee.d.ts",
+      "import": "./dist/marquee.esm.js",
+      "require": "./dist/marquee.cjs.js"
+    },
+    "./number-input": {
+      "types": "./dist/components/number-input.d.ts",
+      "import": "./dist/number-input.esm.js",
+      "require": "./dist/number-input.cjs.js"
+    },
+    "./popover": {
+      "types": "./dist/components/popover.d.ts",
+      "import": "./dist/popover.esm.js",
+      "require": "./dist/popover.cjs.js"
+    },
+    "./rating": {
+      "types": "./dist/components/rating.d.ts",
+      "import": "./dist/rating.esm.js",
+      "require": "./dist/rating.cjs.js"
+    },
+    "./slider": {
+      "types": "./dist/components/slider.d.ts",
+      "import": "./dist/slider.esm.js",
+      "require": "./dist/slider.cjs.js"
+    },
+    "./tabs": {
+      "types": "./dist/components/tabs.d.ts",
+      "import": "./dist/tabs.esm.js",
+      "require": "./dist/tabs.cjs.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "build:watch": "node scripts/build.js --watch",
+    "dev": "npm run docs:dev",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "alpinejs",
+    "headless-ui",
+    "accessible",
+    "components",
+    "alpine",
+    "ui"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eldomagan/alpine-headless-ui.git"
+  },
+  "peerDependencies": {
+    "alpinejs": "^3.0.0"
+  },
+  "devDependencies": {
+    "@alpinejs/collapse": "^3.15.2",
+    "@floating-ui/dom": "^1.7.4",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/alpinejs": "^3.13.11",
+    "@types/node": "^25.0.1",
+    "alpine-define-component": "^1.1.0",
+    "alpinejs": "^3.15.2",
+    "esbuild": "^0.27.1",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7",
+    "vitepress": "^1.5.0"
+  }
+}

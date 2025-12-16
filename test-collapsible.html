@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collapsible Component Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .demo {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem;">Collapsible Component Test</h1>
+
+  <!-- Test 1: Basic Collapsible -->
+  <div class="demo">
+    <h2>1. Basic Collapsible</h2>
+    <div x-collapsible class="border border-gray-200 rounded-lg overflow-hidden">
+      <button x-collapsible:trigger class="w-full px-4 py-3 text-left font-medium bg-white hover:bg-gray-50">
+        Click to toggle
+      </button>
+      <div x-collapsible:content class="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <p class="text-gray-700">This is the collapsible content that can be toggled.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test 2: Initially Open -->
+  <div class="demo">
+    <h2>2. Initially Open</h2>
+    <div x-collapsible="{ open: true }" class="border border-gray-200 rounded-lg overflow-hidden">
+      <button x-collapsible:trigger class="w-full px-4 py-3 text-left font-medium bg-white hover:bg-gray-50">
+        Toggle Content (Initially Open)
+      </button>
+      <div x-collapsible:content class="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <p class="text-gray-700">This content starts expanded.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test 3: Disabled -->
+  <div class="demo">
+    <h2>3. Disabled Collapsible</h2>
+    <div x-collapsible="{ disabled: true }" class="border border-gray-200 rounded-lg overflow-hidden opacity-60">
+      <button x-collapsible:trigger class="w-full px-4 py-3 text-left font-medium bg-white cursor-not-allowed">
+        Disabled Collapsible
+      </button>
+      <div x-collapsible:content class="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <p class="text-gray-700">This content cannot be toggled.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test 4: With Icon -->
+  <div class="demo">
+    <h2>4. With Chevron Icon</h2>
+    <div x-collapsible class="border border-gray-200 rounded-lg overflow-hidden">
+      <button x-collapsible:trigger class="w-full px-4 py-3 text-left font-medium bg-white hover:bg-gray-50 transition-colors flex items-center justify-between">
+        <span>Toggle with Icon</span>
+        <svg x-collapsible:indicator class="w-5 h-5 transition-transform" :class="{ 'rotate-180': $collapsible.open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div x-collapsible:content class="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <p class="text-gray-700">Content with a chevron indicator that rotates when opened.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Alpine.js and plugins -->
+  <script type="module">
+    import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/module.esm.js'
+    import collapse from 'https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/module.esm.js'
+    import collapsible from './dist/collapsible.standalone.js'
+
+    Alpine.plugin(collapse)
+    Alpine.plugin(collapsible)
+
+    window.Alpine = Alpine
+    Alpine.start()
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+name: Release & Publish
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Checkout code only when a release is created
+      - uses: actions/checkout@v4
+        if: steps.release.outputs.releases_created == 'true'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+        if: steps.release.outputs.releases_created == 'true'
+
+      - name: Install dependencies
+        run: npm ci
+        if: steps.release.outputs.releases_created == 'true'
+
+      - name: Build package
+        run: npm run build
+        if: steps.release.outputs.releases_created == 'true'
+
+      # Publish to npm
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: steps.release.outputs.releases_created == 'true'

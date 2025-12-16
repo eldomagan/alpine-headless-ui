@@ -1,0 +1,12 @@
+node_modules
+dist
+*.log
+.DS_Store
+coverage
+.build-temp
+examples
+builds
+
+# VitePress
+docs/.vitepress/cache
+docs/.vitepress/dist
