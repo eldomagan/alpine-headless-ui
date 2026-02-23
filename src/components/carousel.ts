@@ -129,6 +129,10 @@ export default defineComponent({
         return this._slideCount
       },
 
+      get totalPages() {
+        return Math.max(1, this.totalSlides - this.visibleSlidesCount + 1)
+      },
+
       get canGoPrev() {
         return this._config.loop || this.activeIndex > 0
       },
@@ -138,8 +142,8 @@ export default defineComponent({
       },
 
       get progress() {
-        if (this.totalSlides <= 1) return 0
-        return (this.activeIndex / (this.totalSlides - 1)) * 100
+        if (this.totalPages <= 1) { return 0 }
+        return (this.activeIndex / (this.totalPages - 1)) * 100
       },
 
       get computedSlideWidth() {
@@ -161,9 +165,9 @@ export default defineComponent({
         let targetIndex = index
 
         if (this._config.loop) {
-          targetIndex = ((index % this.totalSlides) + this.totalSlides) % this.totalSlides
+          targetIndex = ((index % this.totalPages) + this.totalPages) % this.totalPages
         } else {
-          targetIndex = Math.max(0, Math.min(this.totalSlides - 1, index))
+          targetIndex = Math.max(0, Math.min(this.totalPages - 1, index))
         }
 
         this.activeIndex = targetIndex
@@ -832,7 +836,7 @@ export default defineComponent({
         return {
           'data-scope': 'carousel',
           'data-part': 'pagination-fraction',
-          'x-text': () => `${api.activeIndex + 1} / ${api.totalSlides}`,
+          'x-text': () => `${api.activeIndex + 1} / ${api.totalPages}`,
           'aria-live': 'polite',
           'aria-atomic': 'true',
         }
