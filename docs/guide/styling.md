@@ -318,4 +318,4 @@ Always ensure focus states are visible for accessibility:
 ## See Also
 
 - [Usage Guide](/guide/usage) - Learn how to use components
-- [Components](/components/) - Browse all available components
+- [Components](/components/accordion) - Browse all available components

@@ -206,5 +206,5 @@ Use Alpine's transition directives for animations:
 
 ## Next Steps
 
-- [Components](/components/) - Explore available components
+- [Components](/components/accordion) - Explore available components
 - Check individual component documentation for specific APIs and examples

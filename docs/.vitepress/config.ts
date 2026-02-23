@@ -64,6 +64,20 @@ export default defineConfig({
   },
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }]
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    [
+      'script',
+      {
+        defer: '',
+        src: 'https://cdn.jsdelivr.net/npm/alpine-headless-ui/dist/cdn.min.js'
+      }
+    ],
+    [
+      'script',
+      {
+        defer: '',
+        src: 'https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js'
+      }
+    ]
   ]
 })

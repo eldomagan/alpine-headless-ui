@@ -40,4 +40,4 @@ For quick prototyping, you can use a CDN:
 ## Next Steps
 
 - [Usage](/guide/usage) - Learn how to register and use components
-- [Components](/components/) - Explore available components
+- [Components](/components/accordion) - Explore available components

@@ -213,5 +213,5 @@ For older browsers, consider providing alternative copy methods or displaying th
 
 ## See Also
 
-- [Tooltip](/components/tooltip) - Show helpful hints for clipboard buttons
+- [Popover](/components/popover) - Show helpful hints or feedback for clipboard buttons
 - [Collapsible](/components/collapsible) - Show/hide additional information

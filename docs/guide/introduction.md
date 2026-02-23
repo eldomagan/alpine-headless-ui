@@ -79,4 +79,4 @@ Alpine Headless UI handles the behavior, you control everything else:
 
 - [Installation](/guide/installation) - Get started with Alpine Headless UI
 - [Usage](/guide/usage) - Learn how to use components
-- [Components](/components/) - Explore available components
+- [Components](/components/accordion) - Explore available components
