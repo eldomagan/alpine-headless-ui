@@ -138,11 +138,11 @@ export default defineComponent({
       },
 
       get canGoPrev() {
-        return config.loop || this.activeIndex > 0
+        return this._config.loop || this.activeIndex > 0
       },
 
       get canGoNext() {
-        return config.loop || this.activeIndex < this.totalSlides - this.visibleSlidesCount
+        return this._config.loop || this.activeIndex < this.totalSlides - this.visibleSlidesCount
       },
 
       get progress() {
@@ -168,7 +168,7 @@ export default defineComponent({
 
         let targetIndex = index
 
-        if (config.loop) {
+        if (this._config.loop) {
           targetIndex = ((index % this.totalSlides) + this.totalSlides) % this.totalSlides
         } else {
           targetIndex = Math.max(0, Math.min(this.totalSlides - 1, index))
@@ -187,7 +187,7 @@ export default defineComponent({
 
         this.$dispatch('slidechange', { index: targetIndex })
 
-        if (config.a11y.enabled) {
+        if (this._config.a11y.enabled) {
           this.announceSlide(targetIndex)
         }
       },
@@ -267,7 +267,7 @@ export default defineComponent({
       applyBreakpoints() {
         const windowWidth = window.innerWidth
 
-        const breakpoints = Object.entries(config.breakpoints)
+        const breakpoints = Object.entries(this._config.breakpoints)
           .map(([width, settings]) => [Number(width), settings] as [number, Partial<Props>])
           .sort((a, b) => a[0] - b[0])
 
@@ -280,15 +280,8 @@ export default defineComponent({
           }
         }
 
-        if (activeBreakpoint) {
-          if (activeBreakpoint.slidesPerView !== undefined) {
-            this.slidesPerView = activeBreakpoint.slidesPerView
-          }
-
-          if (activeBreakpoint.spaceBetween !== undefined) {
-            this.spaceBetween = activeBreakpoint.spaceBetween
-          }
-        }
+        this.slidesPerView = activeBreakpoint?.slidesPerView ?? this._config.slidesPerView
+        this.spaceBetween = activeBreakpoint?.spaceBetween ?? this._config.spaceBetween
 
         this.recalculateVisibleSlides()
       },
@@ -341,7 +334,7 @@ export default defineComponent({
       },
 
       onPointerDown(e: PointerEvent) {
-        if (!config.draggable || !viewportEl) {
+        if (!this._config.draggable || !viewportEl) {
           return
         }
 
@@ -382,7 +375,7 @@ export default defineComponent({
         const distance = dragStartX - e.clientX
         let newScrollLeft = dragStartScrollLeft + distance
 
-        if (config.resistance && !config.loop) {
+        if (this._config.resistance && !this._config.loop) {
           const maxScroll = viewportEl.scrollWidth - viewportEl.clientWidth
           if (newScrollLeft < 0) {
             newScrollLeft = newScrollLeft * 0.3
@@ -410,35 +403,35 @@ export default defineComponent({
 
         isDragging = false
 
-        if (!config.freeMode && config.snapToSlides) {
+        if (!this._config.freeMode && this._config.snapToSlides) {
           const distance = viewportEl.scrollLeft - dragStartScrollLeft
           const dragDirection = distance > 0 ? 1 : -1
           const draggedDistance = Math.abs(distance)
 
           let targetIndex = this.activeIndex
 
-          if (draggedDistance > config.threshold) {
+          if (draggedDistance > this._config.threshold) {
             const momentum = Math.abs(dragVelocity) > 0.5 ? dragDirection : 0
             targetIndex = this.activeIndex + dragDirection + momentum
           } else {
             targetIndex = this.activeIndex
           }
 
-          if (!config.loop) {
+          if (!this._config.loop) {
             targetIndex = Math.max(0, Math.min(this.totalSlides - 1, targetIndex))
           }
 
           this.goTo(targetIndex, true)
         }
 
-        if (config.snapToSlides) {
+        if (this._config.snapToSlides) {
           viewportEl.style.scrollSnapType = ''
           viewportEl.style.scrollBehavior = ''
         }
       },
 
       startAutoplay() {
-        if (!config.autoplay || autoplayTimer) {
+        if (!this._config.autoplay || autoplayTimer) {
           return
         }
 
@@ -446,7 +439,7 @@ export default defineComponent({
           if (!this.isAutoplayPaused) {
             this.next()
           }
-        }, config.autoplay.delay)
+        }, this._config.autoplay.delay)
       },
 
       stopAutoplay() {
@@ -465,7 +458,7 @@ export default defineComponent({
       },
 
       onKeydown(e: KeyboardEvent) {
-        if (!config.keyboard) {
+        if (!this._config.keyboard) {
           return
         }
 
@@ -578,20 +571,17 @@ export default defineComponent({
 
         this.updateViewportSize()
 
-        if (Object.keys(config.breakpoints).length > 0) {
-          this.applyBreakpoints()
+        this.applyBreakpoints()
+        const resizeHandler = debounce(() => this.applyBreakpoints(), 150)
+        window.addEventListener('resize', resizeHandler)
 
-          const resizeHandler = debounce(() => this.applyBreakpoints(), 150)
-          window.addEventListener('resize', resizeHandler)
-        }
-
-        if (config.autoplay) {
+        if (this._config.autoplay) {
           this.startAutoplay()
         }
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
         if (prefersReducedMotion) {
-          config.speed = 0
+          this._config.speed = 0
         }
       },
 
@@ -599,6 +589,53 @@ export default defineComponent({
         resizeObserver?.disconnect()
         intersectionObserver?.disconnect()
         this.stopAutoplay()
+      },
+
+      update(settings: Partial<Props>) {
+        if (settings.a11y !== undefined) {
+          this._config.a11y = { ...this._config.a11y, ...settings.a11y }
+        }
+
+        if (settings.autoplay !== undefined) {
+          this.stopAutoplay()
+          this._config.autoplay =
+            typeof settings.autoplay === 'object'
+              ? settings.autoplay
+              : settings.autoplay
+              ? { delay: 3000, pauseOnHover: true, pauseOnFocus: true }
+              : null
+          if (this._config.autoplay) {
+            this.startAutoplay()
+          }
+        }
+
+        const simpleKeys = [
+          'loop', 'keyboard', 'draggable', 'freeMode',
+          'snapToSlides', 'threshold', 'resistance', 'speed',
+        ] as const
+
+        for (const key of simpleKeys) {
+          if (settings[key] !== undefined) {
+            ;(this._config as any)[key] = settings[key]
+          }
+        }
+
+        if (settings.slidesPerView !== undefined) {
+          this._config.slidesPerView = settings.slidesPerView
+          this.slidesPerView = settings.slidesPerView
+        }
+
+        if (settings.spaceBetween !== undefined) {
+          this._config.spaceBetween = settings.spaceBetween
+          this.spaceBetween = settings.spaceBetween
+        }
+
+        if (settings.breakpoints !== undefined) {
+          this._config.breakpoints = settings.breakpoints
+        }
+
+        this.applyBreakpoints()
+        this.recalculateVisibleSlides()
       },
     }
   }),
