@@ -1,6 +1,6 @@
 {
   "name": "alpine-headless-ui",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Headless, accessible UI primitives for Alpine.js",
   "type": "module",
   "main": "./dist/index.cjs",
