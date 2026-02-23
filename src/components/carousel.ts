@@ -1,14 +1,5 @@
 import { defineScope, defineComponent, setup } from 'alpine-define-component'
 
-function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
-  let timeout: ReturnType<typeof setTimeout> | null = null
-  return (...args: Parameters<T>) => {
-    if (timeout) {
-      clearTimeout(timeout)
-    }
-    timeout = setTimeout(() => func(...args), wait)
-  }
-}
 
 interface AutoplayConfig {
   delay: number
@@ -132,9 +123,10 @@ export default defineComponent({
       slidesPerView: config.slidesPerView,
       spaceBetween: config.spaceBetween,
       _config: config,
+      _slideCount: 0,
 
       get totalSlides() {
-        return slidesMap.size
+        return this._slideCount
       },
 
       get canGoPrev() {
@@ -296,6 +288,8 @@ export default defineComponent({
           position: 0,
         })
 
+        this._slideCount++
+
         resizeObserver?.observe(el)
 
         this.recalculateVisibleSlides()
@@ -308,6 +302,7 @@ export default defineComponent({
         if (slide) {
           resizeObserver?.unobserve(slide.el)
           slidesMap.delete(index)
+          this._slideCount--
           this.recalculateVisibleSlides()
         }
       },
@@ -534,6 +529,7 @@ export default defineComponent({
           for (const entry of entries) {
             if (entry.target === viewportEl) {
               this.updateViewportSize()
+              this.applyBreakpoints()
             } else {
               const slideData = Array.from(slidesMap.values()).find((s) => s.el === entry.target)
               if (slideData) {
@@ -572,8 +568,6 @@ export default defineComponent({
         this.updateViewportSize()
 
         this.applyBreakpoints()
-        const resizeHandler = debounce(() => this.applyBreakpoints(), 150)
-        window.addEventListener('resize', resizeHandler)
 
         if (this._config.autoplay) {
           this.startAutoplay()
