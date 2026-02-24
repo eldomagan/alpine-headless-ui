@@ -26,6 +26,11 @@
   all: revert-layer;
 }
 
+/* Reset VitePress prose li spacing inside component examples */
+.component-example-preview li + li {
+  margin-top: 0;
+}
+
 /* ============================================
    Brand Colors
    ============================================ */

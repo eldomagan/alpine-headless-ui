@@ -7,6 +7,7 @@ import countdown from './components/countdown'
 import dialog from './components/dialog'
 import imageZoom from './components/image-zoom'
 import marquee from './components/marquee'
+import navigationMenu from './components/navigation-menu'
 import numberInput from './components/number-input'
 import popover from './components/popover'
 import rating from './components/rating'
@@ -14,7 +15,7 @@ import slider from './components/slider'
 import tabs from './components/tabs'
 
 // Export individual components
-export { accordion, carousel, clipboard, collapsible, countdown, dialog, imageZoom, marquee, numberInput, popover, rating, slider, tabs }
+export { accordion, carousel, clipboard, collapsible, countdown, dialog, imageZoom, marquee, navigationMenu, numberInput, popover, rating, slider, tabs }
 
 // Main plugin
 export default function AlpineHeadlessUI(alpine: typeof Alpine) {
@@ -26,6 +27,7 @@ export default function AlpineHeadlessUI(alpine: typeof Alpine) {
   alpine.plugin(dialog)
   alpine.plugin(imageZoom)
   alpine.plugin(marquee)
+  alpine.plugin(navigationMenu)
   alpine.plugin(numberInput)
   alpine.plugin(popover)
   alpine.plugin(rating)

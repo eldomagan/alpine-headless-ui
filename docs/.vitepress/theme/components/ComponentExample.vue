@@ -222,7 +222,6 @@ onMounted(async () => {
 .component-example {
   border: 1px solid var(--vp-c-border);
   border-radius: 8px;
-  overflow: hidden;
   margin: 24px 0;
 }
 
@@ -232,6 +231,7 @@ onMounted(async () => {
   padding: 12px 20px;
   background: var(--vp-c-bg-soft);
   border-bottom: 1px solid var(--vp-c-border);
+  border-radius: 7px 7px 0 0;
 }
 
 .component-example-spacer {
@@ -272,10 +272,13 @@ onMounted(async () => {
 .component-example-preview {
   padding: 32px 20px;
   background: var(--vp-c-bg);
+  border-radius: 0 0 7px 7px;
 }
 
 .component-example-code {
   background: var(--vp-code-block-bg);
+  border-radius: 0 0 7px 7px;
+  overflow: hidden;
 }
 
 .component-example-code :deep(div[class*='language-']) {

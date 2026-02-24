@@ -55,11 +55,7 @@ export function createPositioning(
   middleware.push(offset(offsetValue))
 
   if (enableFlip) {
-    middleware.push(
-      flip({
-        fallbackAxisSideDirection: 'start',
-      })
-    )
+    middleware.push(flip())
   }
 
   if (enableShift) {
@@ -78,11 +74,15 @@ export function createPositioning(
     cleanup: () => {},
   }
 
+  let isActive = true
+
   const update = async () => {
     const computed = await computePosition(reference, floating, {
       placement,
       middleware,
     })
+
+    if (!isActive) return
 
     Object.assign(floating.style, {
       position: 'absolute',
@@ -130,7 +130,10 @@ export function createPositioning(
 
   const cleanup = autoUpdate(reference, floating, update)
 
-  result.cleanup = cleanup
+  result.cleanup = () => {
+    isActive = false
+    cleanup()
+  }
 
   return result
 }

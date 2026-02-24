@@ -52,6 +52,11 @@
       "import": "./dist/marquee.esm.js",
       "require": "./dist/marquee.cjs.js"
     },
+    "./navigation-menu": {
+      "types": "./dist/components/navigation-menu.d.ts",
+      "import": "./dist/navigation-menu.esm.js",
+      "require": "./dist/navigation-menu.cjs.js"
+    },
     "./number-input": {
       "types": "./dist/components/number-input.d.ts",
       "import": "./dist/number-input.esm.js",
