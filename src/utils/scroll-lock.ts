@@ -15,6 +15,8 @@ export function lockScroll() {
     if (scrollbarWidth > 0) {
       document.body.style.paddingRight = `${scrollbarWidth}px`
     }
+
+    document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`)
   }
 
   lockCount++
@@ -35,5 +37,7 @@ export function unlockScroll() {
       document.body.style.paddingRight = originalBodyPaddingRight
       originalBodyPaddingRight = null
     }
+
+    document.documentElement.style.removeProperty('--scrollbar-width')
   }
 }

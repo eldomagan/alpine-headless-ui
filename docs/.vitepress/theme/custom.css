@@ -197,6 +197,7 @@
 .VPNav {
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--vp-c-divider);
+  padding-right: var(--scrollbar-width, 0px);
 }
 
 .VPNavBar {
