@@ -8,6 +8,7 @@ interface Props {
   closeDelay?: number
   value?: string | null
   placement?: Placement
+  strategy?: 'absolute' | 'fixed'
   offset?: number
 }
 
@@ -48,6 +49,7 @@ export default defineComponent({
       delay: props.delay ?? 50,
       closeDelay: props.closeDelay ?? 50,
       placement: props.placement ?? ('bottom' as Placement),
+      strategy: props.strategy ?? ('absolute' as const),
       offset: props.offset ?? 8,
     }
 
@@ -203,6 +205,7 @@ export default defineComponent({
 
         const result = createPositioning(triggerEl, positionerEl, {
           placement: config.placement,
+          strategy: config.strategy,
           offset: config.offset,
           arrow: arrowEl,
         })
@@ -550,7 +553,7 @@ export default defineComponent({
         return {
           'data-scope': 'navigation-menu',
           'data-part': 'positioner',
-          style: 'position: absolute;',
+          'x-bind:style': () => `position: ${api._config.strategy};`,
           'x-show': () => api.isOpen,
           'x-bind:data-state': () => (api.isOpen ? 'open' : 'closed'),
           'x-init'() {

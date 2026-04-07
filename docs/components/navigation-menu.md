@@ -224,6 +224,7 @@ Control the active value from outside using Alpine's `x-model`.
 | `closeDelay` | `number` | `50` | Hover-to-close delay in milliseconds |
 | `value` | `string \| null` | `null` | Currently active item value |
 | `placement` | `Placement` | `'bottom'` | Dropdown position relative to trigger |
+| `strategy` | `'absolute' \| 'fixed'` | `'absolute'` | CSS positioning strategy for the dropdown |
 | `offset` | `number` | `8` | Distance from trigger in pixels |
 
 ### Placement Values

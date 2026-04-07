@@ -13,6 +13,7 @@ export type { Placement }
 
 export interface PositioningOptions {
   placement?: Placement
+  strategy?: 'absolute' | 'fixed'
   offset?: number
   flip?: boolean
   shift?: boolean
@@ -43,6 +44,7 @@ export function createPositioning(
 ): PositioningResult {
   const {
     placement = 'bottom',
+    strategy = 'absolute',
     offset: offsetValue = 8,
     flip: enableFlip = true,
     shift: enableShift = true,
@@ -79,13 +81,14 @@ export function createPositioning(
   const update = async () => {
     const computed = await computePosition(reference, floating, {
       placement,
+      strategy,
       middleware,
     })
 
     if (!isActive) return
 
     Object.assign(floating.style, {
-      position: 'absolute',
+      position: strategy,
       left: `${computed.x}px`,
       top: `${computed.y}px`,
     })
