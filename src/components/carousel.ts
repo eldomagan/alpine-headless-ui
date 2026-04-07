@@ -142,8 +142,8 @@ export default defineComponent({
       },
 
       get progress() {
-        if (this.totalPages <= 1) { return 0 }
-        return (this.activeIndex / (this.totalPages - 1)) * 100
+        if (this.totalPages <= 1) { return 100 }
+        return ((this.activeIndex + 1) / this.totalPages) * 100
       },
 
       get computedSlideWidth() {
