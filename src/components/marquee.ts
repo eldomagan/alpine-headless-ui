@@ -9,6 +9,9 @@ interface Props {
   speed?: number
   delay?: number
   loopCount?: number
+  breakpoints?: {
+    [width: number]: Partial<Props>
+  }
 }
 
 const CONTENT_SELECTOR = '[data-part="content"]'
@@ -21,19 +24,31 @@ export default defineComponent({
     const viewportId = generateId('viewport')
     const controlId = generateId('control')
 
+    const config = {
+      vertical: props.vertical ?? false,
+      reverse: props.reverse ?? false,
+      pauseOnHover: props.pauseOnHover ?? true,
+      pauseOnFocus: props.pauseOnFocus ?? true,
+      speed: props.speed ?? 50,
+      delay: props.delay ?? 0,
+      loopCount: props.loopCount ?? Infinity,
+      breakpoints: props.breakpoints ?? {},
+    }
+
     return {
       rootId,
       viewportId,
       controlId,
 
-      vertical: props.vertical ?? false,
-      reverse: props.reverse ?? false,
-      pauseOnHover: props.pauseOnHover ?? true,
-      pauseOnFocus: props.pauseOnFocus ?? true,
+      vertical: config.vertical,
+      reverse: config.reverse,
+      pauseOnHover: config.pauseOnHover,
+      pauseOnFocus: config.pauseOnFocus,
       defaultPaused: props.defaultPaused ?? false,
-      speed: props.speed ?? 50,
-      delay: props.delay ?? 0,
-      loopCount: props.loopCount ?? Infinity,
+      speed: config.speed,
+      delay: config.delay,
+      loopCount: config.loopCount,
+      _config: config,
 
       state: (props.defaultPaused ? 'paused' : 'playing') as 'playing' | 'paused',
       _prefersReducedMotion: false,
@@ -78,6 +93,32 @@ export default defineComponent({
         }
       },
 
+      applyBreakpoints() {
+        const windowWidth = window.innerWidth
+        const breakpoints = Object.entries(this._config.breakpoints)
+          .map(([w, s]) => [Number(w), s] as [number, Partial<Props>])
+          .sort((a, b) => a[0] - b[0])
+
+        let active: Partial<Props> | null = null
+        for (const [w, s] of breakpoints) {
+          if (windowWidth >= w) {
+            active = s
+          } else {
+            break
+          }
+        }
+
+        this.vertical = active?.vertical ?? this._config.vertical
+        this.reverse = active?.reverse ?? this._config.reverse
+        this.speed = active?.speed ?? this._config.speed
+        this.pauseOnHover = active?.pauseOnHover ?? this._config.pauseOnHover
+        this.pauseOnFocus = active?.pauseOnFocus ?? this._config.pauseOnFocus
+        this.delay = active?.delay ?? this._config.delay
+        this.loopCount = active?.loopCount ?? this._config.loopCount
+
+        this._calculateDuration()
+      },
+
       init() {
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
         this._prefersReducedMotion = mediaQuery.matches
@@ -112,8 +153,14 @@ export default defineComponent({
             })
           }
 
-          window.addEventListener('resize', () => this._handleResize())
+          const resizeObserver = new ResizeObserver(() => {
+            this._handleResize()
+            this.applyBreakpoints()
+          })
+          resizeObserver.observe(this.$root)
         })
+
+        this.applyBreakpoints()
 
         if (!this._prefersReducedMotion && !this.defaultPaused) {
           this.play()
@@ -238,7 +285,6 @@ export default defineComponent({
       return {
         'data-scope': 'marquee',
         'data-part': 'item',
-        style: 'flex-shrink: 0;',
       }
     },
 

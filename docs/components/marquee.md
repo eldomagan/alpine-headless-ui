@@ -413,6 +413,31 @@ Marquee pauses when it receives keyboard focus (enabled by default):
 
 </ComponentExample>
 
+## Responsive Breakpoints
+
+Override any prop based on screen width using `breakpoints`. This uses a mobile-first approach where each breakpoint applies at its width and above.
+
+```html
+<!-- Vertical on mobile, horizontal on desktop with faster speed -->
+<div x-marquee="{ vertical: true, speed: 30, breakpoints: { 768: { vertical: false, speed: 60 } } }">
+  ...
+</div>
+```
+
+You can set multiple breakpoints:
+
+```html
+<div x-marquee="{
+  speed: 30,
+  breakpoints: {
+    640: { speed: 50 },
+    1024: { speed: 80 }
+  }
+}">
+  ...
+</div>
+```
+
 ## API Reference
 
 ### Root Props
@@ -427,6 +452,7 @@ Marquee pauses when it receives keyboard focus (enabled by default):
 | `defaultPaused` | `boolean` | `false` | Start in paused state |
 | `delay` | `number` | `0` | Delay before animation starts (in milliseconds) |
 | `loopCount` | `number` | `Infinity` | Number of times to loop the animation (infinite by default) |
+| `breakpoints` | `object` | `{}` | Responsive breakpoint settings (e.g., `{ 768: { vertical: false } }`) |
 
 ### Parts
 
