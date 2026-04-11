@@ -17,6 +17,11 @@
       "import": "./dist/accordion.esm.js",
       "require": "./dist/accordion.cjs.js"
     },
+    "./before-after": {
+      "types": "./dist/components/before-after.d.ts",
+      "import": "./dist/before-after.esm.js",
+      "require": "./dist/before-after.cjs.js"
+    },
     "./carousel": {
       "types": "./dist/components/carousel.d.ts",
       "import": "./dist/carousel.esm.js",

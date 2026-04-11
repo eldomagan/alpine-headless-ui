@@ -73,6 +73,7 @@ export default defineConfig({
           { text: 'Collapsible', link: '/components/collapsible' },
           { text: 'Countdown', link: '/components/countdown' },
           { text: 'Dialog', link: '/components/dialog' },
+          { text: 'Before After', link: '/components/before-after' },
           { text: 'Image Zoom', link: '/components/image-zoom' },
           { text: 'Marquee', link: '/components/marquee' },
           { text: 'Navigation Menu', link: '/components/navigation-menu' },

@@ -5,6 +5,7 @@ import clipboard from './components/clipboard'
 import collapsible from './components/collapsible'
 import countdown from './components/countdown'
 import dialog from './components/dialog'
+import beforeAfter from './components/before-after'
 import imageZoom from './components/image-zoom'
 import marquee from './components/marquee'
 import navigationMenu from './components/navigation-menu'
@@ -15,7 +16,7 @@ import slider from './components/slider'
 import tabs from './components/tabs'
 
 // Export individual components
-export { accordion, carousel, clipboard, collapsible, countdown, dialog, imageZoom, marquee, navigationMenu, numberInput, popover, rating, slider, tabs }
+export { accordion, carousel, clipboard, collapsible, countdown, dialog, beforeAfter, imageZoom, marquee, navigationMenu, numberInput, popover, rating, slider, tabs }
 
 // Main plugin
 export default function AlpineHeadlessUI(alpine: typeof Alpine) {
@@ -25,6 +26,7 @@ export default function AlpineHeadlessUI(alpine: typeof Alpine) {
   alpine.plugin(collapsible)
   alpine.plugin(countdown)
   alpine.plugin(dialog)
+  alpine.plugin(beforeAfter)
   alpine.plugin(imageZoom)
   alpine.plugin(marquee)
   alpine.plugin(navigationMenu)
