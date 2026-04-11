@@ -167,6 +167,24 @@ export default defineComponent({
         handle?.focus()
       },
 
+      update(settings: Partial<Props>) {
+        if (settings.orientation !== undefined) {
+          config.orientation = settings.orientation
+        }
+        if (settings.disabled !== undefined) {
+          config.disabled = settings.disabled
+          if (config.disabled) {
+            cleanupDrag?.()
+          }
+        }
+        if (settings.step !== undefined) {
+          config.step = settings.step
+        }
+        if (settings.value !== undefined) {
+          this.value = clamp(roundToStep(settings.value))
+        }
+      },
+
       init(this: any) {
         rootEl = this.$el
       },
