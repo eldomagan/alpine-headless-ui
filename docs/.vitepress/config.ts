@@ -41,8 +41,9 @@ export default defineConfig({
     plugins: [
       tailwindcss() as any,
       ...(isProd ? [] : [serveLocalScripts()]),
-    ]
+    ],
   },
+
 
   themeConfig: {
     logo: '/logo.svg',
