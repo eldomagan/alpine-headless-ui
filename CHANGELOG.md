@@ -1,12 +1,5 @@
 # Changelog
 
-## [1.3.1](https://github.com/eldomagan/alpine-headless-ui/compare/alpine-headless-ui-v1.3.0...alpine-headless-ui-v1.3.1) (2026-04-16)
-
-
-### Bug Fixes
-
-* **ci:** use npm install instead of npm ci in release workflow ([afccda9](https://github.com/eldomagan/alpine-headless-ui/commit/afccda940397d3a9205ba3b4c322587e2f16808c))
-
 ## [1.3.0](https://github.com/eldomagan/alpine-headless-ui/compare/alpine-headless-ui-v1.2.0...alpine-headless-ui-v1.3.0) (2026-04-16)
 
 
