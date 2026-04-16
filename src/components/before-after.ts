@@ -9,17 +9,9 @@ interface Props {
 
 export default defineComponent({
   name: 'before-after',
-  // @ts-ignore - modelable is a valid option but not in types
-  modelable: 'value',
 
   setup: setup((props: Props, { generateId }) => {
     const rootId = generateId('root')
-
-    const config = {
-      orientation: props.orientation ?? 'horizontal',
-      disabled: props.disabled ?? false,
-      step: props.step ?? 1,
-    }
 
     const initialValue = Math.max(0, Math.min(100, props.value ?? 50))
 
@@ -30,33 +22,21 @@ export default defineComponent({
       return Math.max(0, Math.min(100, value))
     }
 
-    function roundToStep(value: number): number {
-      return Math.round(value / config.step) * config.step
-    }
-
-    function getValueFromPoint(clientX: number, clientY: number, rect: DOMRect): number {
-      if (config.orientation === 'horizontal') {
-        const position = clientX - rect.left
-        return clamp((position / rect.width) * 100)
-      } else {
-        const position = clientY - rect.top
-        return clamp((position / rect.height) * 100)
-      }
-    }
-
     return {
       rootId,
-      _config: config,
 
       value: initialValue,
+      orientation: (props.orientation ?? 'horizontal') as 'horizontal' | 'vertical',
+      disabled: props.disabled ?? false,
+      step: props.step ?? 1,
       isDragging: false,
 
       setValue(newValue: number, dispatch = false) {
-        if (config.disabled) {
+        if (this.disabled) {
           return
         }
 
-        this.value = clamp(roundToStep(newValue))
+        this.value = clamp(Math.round(newValue / this.step) * this.step)
 
         if (dispatch) {
           this.$dispatch('change', { value: this.value })
@@ -64,7 +44,7 @@ export default defineComponent({
       },
 
       handlePointerDown(event: PointerEvent) {
-        if (config.disabled) {
+        if (this.disabled) {
           return
         }
 
@@ -81,7 +61,10 @@ export default defineComponent({
           }
 
           const rect = rootEl.getBoundingClientRect()
-          const newValue = getValueFromPoint(e.clientX, e.clientY, rect)
+          const isHorizontal = this.orientation === 'horizontal'
+          const position = isHorizontal ? e.clientX - rect.left : e.clientY - rect.top
+          const size = isHorizontal ? rect.width : rect.height
+          const newValue = clamp((position / size) * 100)
           this.setValue(newValue, true)
         }
 
@@ -103,23 +86,23 @@ export default defineComponent({
       },
 
       handleKeydown(event: KeyboardEvent) {
-        if (config.disabled) {
+        if (this.disabled) {
           return
         }
 
         let newValue = this.value
-        const largeStep = config.step * 10
+        const largeStep = this.step * 10
 
         switch (event.key) {
           case 'ArrowRight':
           case 'ArrowUp':
             event.preventDefault()
-            newValue = this.value + config.step
+            newValue = this.value + this.step
             break
           case 'ArrowLeft':
           case 'ArrowDown':
             event.preventDefault()
-            newValue = this.value - config.step
+            newValue = this.value - this.step
             break
           case 'PageUp':
             event.preventDefault()
@@ -145,7 +128,7 @@ export default defineComponent({
       },
 
       handleRootPointerDown(event: PointerEvent) {
-        if (config.disabled) {
+        if (this.disabled) {
           return
         }
 
@@ -159,7 +142,10 @@ export default defineComponent({
         }
 
         const rect = rootEl.getBoundingClientRect()
-        const newValue = getValueFromPoint(event.clientX, event.clientY, rect)
+        const isHorizontal = this.orientation === 'horizontal'
+        const position = isHorizontal ? event.clientX - rect.left : event.clientY - rect.top
+        const size = isHorizontal ? rect.width : rect.height
+        const newValue = clamp((position / size) * 100)
         this.setValue(newValue, true)
 
         // Focus the handle for keyboard follow-up
@@ -169,19 +155,19 @@ export default defineComponent({
 
       update(settings: Partial<Props>) {
         if (settings.orientation !== undefined) {
-          config.orientation = settings.orientation
+          this.orientation = settings.orientation
         }
         if (settings.disabled !== undefined) {
-          config.disabled = settings.disabled
-          if (config.disabled) {
+          this.disabled = settings.disabled
+          if (this.disabled) {
             cleanupDrag?.()
           }
         }
         if (settings.step !== undefined) {
-          config.step = settings.step
+          this.step = settings.step
         }
         if (settings.value !== undefined) {
-          this.value = clamp(roundToStep(settings.value))
+          this.value = clamp(Math.round(settings.value / this.step) * this.step)
         }
       },
 
@@ -202,8 +188,8 @@ export default defineComponent({
         'data-scope': 'before-after',
         'data-part': 'root',
         id: api.rootId,
-        'data-orientation': api._config.orientation,
-        ':data-disabled': () => (api._config.disabled ? '' : undefined),
+        ':data-orientation': () => api.orientation,
+        ':data-disabled': () => (api.disabled ? '' : undefined),
         ':data-dragging': () => (api.isDragging ? '' : undefined),
         'x-modelable': 'value',
         ':style': () => ({
@@ -219,12 +205,11 @@ export default defineComponent({
     },
 
     before(api) {
-      const isHorizontal = api._config.orientation === 'horizontal'
       return {
         'data-scope': 'before-after',
         'data-part': 'before',
         ':style': () => {
-          if (isHorizontal) {
+          if (api.orientation === 'horizontal') {
             return {
               position: 'absolute',
               inset: '0',
@@ -242,12 +227,11 @@ export default defineComponent({
     },
 
     after(api) {
-      const isHorizontal = api._config.orientation === 'horizontal'
       return {
         'data-scope': 'before-after',
         'data-part': 'after',
         ':style': () => {
-          if (isHorizontal) {
+          if (api.orientation === 'horizontal') {
             return {
               position: 'absolute',
               inset: '0',
@@ -265,13 +249,13 @@ export default defineComponent({
     },
 
     separator(api) {
-      const isHorizontal = api._config.orientation === 'horizontal'
       return {
         'data-scope': 'before-after',
         'data-part': 'separator',
+        ':data-orientation': () => api.orientation,
         'aria-hidden': 'true',
         ':style': () => {
-          if (isHorizontal) {
+          if (api.orientation === 'horizontal') {
             return {
               position: 'absolute',
               top: '0',
@@ -293,18 +277,17 @@ export default defineComponent({
     },
 
     handle(api) {
-      const isHorizontal = api._config.orientation === 'horizontal'
       return {
         'data-scope': 'before-after',
         'data-part': 'handle',
         role: 'slider',
-        tabindex: api._config.disabled ? -1 : 0,
+        ':tabindex': () => (api.disabled ? -1 : 0),
         ':aria-valuenow': () => Math.round(api.value),
         ':aria-valuetext': () => `${Math.round(api.value)} percent`,
         'aria-valuemin': 0,
         'aria-valuemax': 100,
-        ':aria-orientation': () => api._config.orientation,
-        ':aria-disabled': () => api._config.disabled,
+        ':aria-orientation': () => api.orientation,
+        ':aria-disabled': () => api.disabled,
         'x-on:pointerdown'(event: PointerEvent) {
           api.handlePointerDown(event)
         },
@@ -312,7 +295,7 @@ export default defineComponent({
           api.handleKeydown(event)
         },
         ':style': () => {
-          if (isHorizontal) {
+          if (api.orientation === 'horizontal') {
             return {
               position: 'absolute',
               top: '50%',
