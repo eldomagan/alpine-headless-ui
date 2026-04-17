@@ -117,7 +117,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
-    "alpine-define-component": "^1.1.0"
+    "alpine-define-component": "^1.2.0"
   },
   "peerDependencies": {
     "alpinejs": "^3.0.0"
