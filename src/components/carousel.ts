@@ -558,12 +558,6 @@ export default defineComponent({
           'data-part': 'root',
           role: 'region',
           'aria-roledescription': 'carousel',
-          'x-init'(this: any) {
-            api.init.call(this)
-          },
-          'x-on:destroy'() {
-            api.destroy()
-          },
         }
       },
 

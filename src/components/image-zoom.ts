@@ -130,12 +130,6 @@ export default defineComponent({
           // Clip scaled image to original bounds in inner mode
           overflow: api._config.zoomType === 'inner' ? 'hidden' : 'visible',
         }),
-        'x-init'(this: any) {
-          api.init.call(this)
-        },
-        'x-on:destroy'() {
-          api.destroy()
-        },
       }
     },
 
