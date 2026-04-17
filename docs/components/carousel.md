@@ -7,7 +7,7 @@ A transform-based carousel component. Uses CSS transforms (`translateX`) for smo
 - ✅ **CSS transform-based**: Smooth `translateX` animations
 - ✅ **No dependencies**: Fully self-contained
 - ✅ **Touch/swipe gestures**: Drag slides with mouse or touch
-- ✅ **Infinite loop**: Optional looping
+- ✅ **Loop mode**: Optional wrap-around at the ends (not a seamless infinite loop)
 - ✅ **Autoplay**: With configurable delay and pause on hover/focus
 - ✅ **Responsive**: Media query-based breakpoints
 - ✅ **Pagination**: Dots, fraction, and progress bar
@@ -57,7 +57,7 @@ Show multiple slides at once with `slidesPerView`.
 
 ## Pagination Dots
 
-Add pagination dots for visual page indicators.
+Add pagination dots for visual page indicators. Each bullet requires an explicit page index value (`x-carousel:pagination="0"`, `"1"`, etc.). The total number of navigable pages is `totalSlides - slidesPerView + 1`. For `slidesPerView: 1` that equals the slide count. For `slidesPerView: 3` over 10 slides, there are 8 navigable pages.
 
 <ComponentExample>
 <div x-cloak x-carousel="{ slidesPerView: 1, spaceBetween: 16 }">
@@ -149,7 +149,7 @@ Enable automatic slide progression. Use `loop: true` with autoplay so slides cyc
 
 ## Loop Mode
 
-Enable infinite looping with `loop: true`.
+Enable wrap-around at the ends with `loop: true`. Advancing past the last page wraps to the first, and vice versa. Note: this is a wrap, not a seamless infinite scroll (there is no clone track). The transform jumps at the boundary.
 
 <ComponentExample>
 <div x-cloak x-carousel="{ slidesPerView: 1, spaceBetween: 16, loop: true }">
@@ -166,6 +166,12 @@ Enable infinite looping with `loop: true`.
   </div>
 </div>
 </ComponentExample>
+
+## Dragging
+
+When `draggable: true` (the default), the track applies `user-select: none` so pointer drags don't trigger text selection. As a consequence, users cannot select text inside slides while the carousel is draggable. Set `draggable: false` for text-heavy carousels.
+
+While a drag is in progress, autoplay is paused. It resumes on pointer release if it was running before the drag started.
 
 ## Responsive Breakpoints
 
@@ -238,8 +244,11 @@ Use media query strings as keys for breakpoint-specific settings.
 | `resistance` | `boolean` | `true` | Resistance effect at edges when not looping |
 | `autoplay` | `boolean \| AutoplayConfig` | `false` | Enable autoplay |
 | `speed` | `number` | `300` | Transition speed in ms |
+| `easing` | `string` | `'ease'` | CSS timing function for the slide transition |
 | `breakpoints` | `object` | `{}` | Responsive breakpoint settings |
 | `a11y` | `A11yConfig` | see below | Accessibility configuration |
+| `label` | `string` | `undefined` | Sets `aria-label` on the root region |
+| `labelledBy` | `string` | `undefined` | Sets `aria-labelledby` on the root region (takes precedence over `label`) |
 
 ### Autoplay Config
 
@@ -278,8 +287,6 @@ Access via `$carousel` in Alpine expressions (e.g., `$carousel.activeIndex`):
 |----------|------|-------------|
 | `activeIndex` | `number` | Index of the first visible slide |
 | `pageIndex` | `number` | Same as `activeIndex` (each page is one slide position) |
-| `firstVisibleIndex` | `number` | Index of the first visible slide |
-| `lastVisibleIndex` | `number` | Index of the last visible slide |
 | `totalSlides` | `number` | Total number of slides |
 | `totalPages` | `number` | Number of navigable positions (`totalSlides - slidesPerView + 1`) |
 | `canGoPrev` | `boolean` | Whether previous navigation is possible |
@@ -291,14 +298,14 @@ Access via `$carousel` in Alpine expressions (e.g., `$carousel.activeIndex`):
 
 | Method | Description |
 |--------|-------------|
-| `goTo(index, smooth?)` | Go to specific slide |
+| `goTo(index, smooth?, silent?)` | Go to specific slide. When `silent` is `true`, suppresses the `slidechange` event and screen-reader announcement (used internally for resize/breakpoint reflows) |
 | `next()` | Go to next slide |
 | `prev()` | Go to previous slide |
 | `update(settings)` | Update carousel settings at runtime |
 | `startAutoplay()` | Start autoplay |
 | `stopAutoplay()` | Stop autoplay |
-| `pauseAutoplay()` | Pause autoplay temporarily |
-| `resumeAutoplay()` | Resume autoplay |
+| `pauseAutoplay(source?)` | Pause autoplay. `source` is `'hover'`, `'focus'`, or `'drag'` (default `'hover'`). Autoplay stays paused until every source that paused it has resumed |
+| `resumeAutoplay(source?)` | Resume autoplay from a given source (default `'hover'`) |
 
 ### Events
 
@@ -346,8 +353,10 @@ The carousel follows accessibility best practices:
 - **Keyboard navigation**: Arrow keys to navigate, Home/End for first/last
 - **ARIA attributes**: Proper roles and labels for screen readers
 - **Focus management**: Keyboard focus support with visible indicators
-- **Reduced motion**: Respects `prefers-reduced-motion` setting
+- **Reduced motion**: Respects `prefers-reduced-motion` setting, and updates live when the OS setting changes
 - **Announcements**: Live region announces slide changes
+- **Offscreen slides**: Non-visible slides get `aria-hidden="true"` and `inert`, removing them from the tab order and screen-reader flow
+- **RTL support**: When the root has `dir="rtl"`, the track transform and drag direction mirror automatically. Arrow-key navigation follows the WAI-ARIA convention and does not mirror (ArrowLeft is always logical previous, ArrowRight logical next)
 
 ### Keyboard Interactions
 

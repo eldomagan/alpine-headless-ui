@@ -23,8 +23,11 @@ interface Props {
   resistance?: boolean
   autoplay?: boolean | AutoplayConfig
   speed?: number
+  easing?: string
   breakpoints?: Record<string, Partial<Props>>
   a11y?: A11yConfig
+  label?: string
+  labelledBy?: string
 }
 
 interface SlideScope {
@@ -48,6 +51,110 @@ type CarouselScopes = {
   $pagination: PaginationScope
 }
 
+type NormalizedAutoplay = {
+  delay: number
+  pauseOnHover: boolean
+  pauseOnFocus: boolean
+} | null
+
+type PauseSource = 'hover' | 'focus' | 'drag'
+
+type Config = {
+  slidesPerView: number
+  spaceBetween: number
+  loop: boolean
+  keyboard: boolean
+  draggable: boolean
+  freeMode: boolean
+  threshold: number
+  resistance: boolean
+  speed: number
+  easing: string
+  autoplay: NormalizedAutoplay
+  a11y: Required<A11yConfig>
+  breakpoints: Record<string, Partial<Props>>
+  label?: string
+  labelledBy?: string
+}
+
+function normalizeAutoplay(value: boolean | AutoplayConfig | undefined): NormalizedAutoplay {
+  if (typeof value === 'object' && value !== null) {
+    return {
+      delay: value.delay ?? 3000,
+      pauseOnHover: value.pauseOnHover ?? true,
+      pauseOnFocus: value.pauseOnFocus ?? true,
+    }
+  }
+
+  if (value) {
+    return { delay: 3000, pauseOnHover: true, pauseOnFocus: true }
+  }
+
+  return null
+}
+
+function assignSettings(config: Config, input: Partial<Props>): void {
+  if (input.slidesPerView !== undefined) {
+    config.slidesPerView = Math.max(1, input.slidesPerView)
+  }
+
+  if (input.spaceBetween !== undefined) {
+    config.spaceBetween = input.spaceBetween
+  }
+
+  if (input.loop !== undefined) {
+    config.loop = input.loop
+  }
+
+  if (input.keyboard !== undefined) {
+    config.keyboard = input.keyboard
+  }
+
+  if (input.draggable !== undefined) {
+    config.draggable = input.draggable
+  }
+
+  if (input.freeMode !== undefined) {
+    config.freeMode = input.freeMode
+  }
+
+  if (input.threshold !== undefined) {
+    config.threshold = input.threshold
+  }
+
+  if (input.resistance !== undefined) {
+    config.resistance = input.resistance
+  }
+
+  if (input.speed !== undefined) {
+    config.speed = input.speed
+  }
+
+  if (input.easing !== undefined) {
+    config.easing = input.easing
+  }
+
+  if (input.autoplay !== undefined) {
+    config.autoplay = normalizeAutoplay(input.autoplay)
+  }
+
+  if (input.a11y !== undefined) {
+    config.a11y = { ...config.a11y, ...input.a11y }
+  }
+
+  if (input.breakpoints !== undefined) {
+    config.breakpoints = input.breakpoints
+  }
+
+  if (input.label !== undefined) {
+    config.label = input.label
+  }
+
+  if (input.labelledBy !== undefined) {
+    config.labelledBy = input.labelledBy
+  }
+}
+
 export default defineComponent({
   name: 'carousel',
 
@@ -55,48 +162,47 @@ export default defineComponent({
     const rootId = generateId('root')
     const viewportId = generateId('viewport')
 
-    const config = {
-      slidesPerView: Math.max(1, props.slidesPerView ?? 1),
-      spaceBetween: props.spaceBetween ?? 0,
-      loop: props.loop ?? false,
-      keyboard: props.keyboard ?? true,
-      draggable: props.draggable ?? true,
-      freeMode: props.freeMode ?? false,
-      threshold: props.threshold ?? 20,
-      resistance: props.resistance ?? true,
-      speed: props.speed ?? 300,
-      autoplay:
-        typeof props.autoplay === 'object'
-          ? {
-              delay: props.autoplay.delay ?? 3000,
-              pauseOnHover: props.autoplay.pauseOnHover ?? true,
-              pauseOnFocus: props.autoplay.pauseOnFocus ?? true,
-            }
-          : props.autoplay
-            ? { delay: 3000, pauseOnHover: true, pauseOnFocus: true }
-            : null,
+    const config: Config = {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      loop: false,
+      keyboard: true,
+      draggable: true,
+      freeMode: false,
+      threshold: 20,
+      resistance: true,
+      speed: 300,
+      easing: 'ease',
+      autoplay: null,
       a11y: {
         enabled: true,
         prevSlideMessage: 'Previous slide',
         nextSlideMessage: 'Next slide',
-        ...props.a11y,
       },
-      breakpoints: props.breakpoints ?? {},
+      breakpoints: {},
+      label: undefined,
+      labelledBy: undefined,
     }
+
+    assignSettings(config, props)
+
+    let originalSpeed = config.speed
 
     let rootEl: HTMLElement | null = null
     let viewportEl: HTMLElement | null = null
     let trackEl: HTMLElement | null = null
-    let initialized = false
+    let destroyed = false
+    let isRtl = false
+    let lastTransition = ''
 
-    let slideCount = 0
     let trackOffset = 0
     let containerWidth = 0
 
     let autoplayTimer: ReturnType<typeof setInterval> | null = null
-    let rafId: number | null = null
     let resizeObserver: ResizeObserver | null = null
     let mediaListeners: Array<{ mql: MediaQueryList; query: string; handler: () => void }> = []
+    let reducedMotionMql: MediaQueryList | null = null
+    let reducedMotionHandler: (() => void) | null = null
 
     let activeSlidesPerView = config.slidesPerView
     let activeSpaceBetween = config.spaceBetween
@@ -106,6 +212,9 @@ export default defineComponent({
     let dragStartOffset = 0
 
     function getSlideWidth(): number {
+      if (containerWidth <= 0 || activeSlidesPerView <= 0) {
+        return 0
+      }
       const totalGaps = activeSlidesPerView - 1
       return (containerWidth - totalGaps * activeSpaceBetween) / activeSlidesPerView
     }
@@ -114,9 +223,15 @@ export default defineComponent({
       return getSlideWidth() + activeSpaceBetween
     }
 
-    function getMaxOffset(): number {
-      const totalWidth = slideCount * getSlideWidth() + (slideCount - 1) * activeSpaceBetween
-      return Math.max(0, totalWidth - containerWidth)
+    function getTrackWidth(slideCount: number): number {
+      if (slideCount <= 0) {
+        return 0
+      }
+      return slideCount * getSlideWidth() + (slideCount - 1) * activeSpaceBetween
+    }
+
+    function getMaxOffset(slideCount: number): number {
+      return Math.max(0, getTrackWidth(slideCount) - containerWidth)
     }
 
     function applyTransform(offset: number, animate: boolean) {
@@ -124,14 +239,21 @@ export default defineComponent({
         return
       }
 
-      trackEl.style.transition = animate
-        ? `transform ${config.speed}ms ease`
+      const nextTransition = animate
+        ? `transform ${config.speed}ms ${config.easing}`
         : 'none'
-      trackEl.style.transform = `translateX(${offset}px)`
+
+      if (nextTransition !== lastTransition) {
+        trackEl.style.transition = nextTransition
+        lastTransition = nextTransition
+      }
+
+      const x = isRtl ? -offset : offset
+      trackEl.style.transform = `translateX(${x}px)`
     }
 
     function updateSlideWidths() {
-      if (!trackEl) {
+      if (!trackEl || containerWidth <= 0 || activeSlidesPerView <= 0) {
         return
       }
 
@@ -145,7 +267,7 @@ export default defineComponent({
       })
     }
 
-    function announceSlide(index: number) {
+    function announceSlide(index: number, total: number) {
       if (!config.a11y.enabled) {
         return
       }
@@ -156,26 +278,37 @@ export default defineComponent({
       liveRegion.setAttribute('aria-atomic', 'true')
       liveRegion.style.cssText =
         'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap'
-      liveRegion.textContent = `Slide ${index + 1} of ${slideCount}`
+      liveRegion.textContent = `Slide ${index + 1} of ${total}`
       document.body.appendChild(liveRegion)
       setTimeout(() => liveRegion.remove(), 1000)
+    }
+
+    function applyReducedMotion() {
+      if (reducedMotionMql && reducedMotionMql.matches) {
+        config.speed = 0
+      } else {
+        config.speed = originalSpeed
+      }
     }
 
     return {
       rootId,
       viewportId,
       activeIndex: 0,
-      firstVisibleIndex: 0,
-      lastVisibleIndex: 0,
-      isAutoplayPaused: false,
-      _slideCount: 0,
+      slideIds: [] as string[],
+      _pausedByHover: false,
+      _pausedByFocus: false,
+      _pausedByDrag: false,
       _activeSlidesPerView: config.slidesPerView,
       _config: config,
 
       get totalSlides() {
-        return this._slideCount
+        return this.slideIds.length
       },
 
+      // totalPages = number of valid starting positions
+      // (totalSlides - slidesPerView + 1). For slidesPerView=3 over 10 slides
+      // this is 8 distinct scroll stops, not 4 visual pages.
       get pageIndex() {
         return this.activeIndex
       },
@@ -199,7 +332,13 @@ export default defineComponent({
         return ((this.pageIndex + 1) / this.totalPages) * 100
       },
 
-      goTo(index: number, smooth = true) {
+      get isAutoplayPaused() {
+        return this._pausedByHover || this._pausedByFocus || this._pausedByDrag
+      },
+
+      goTo(index: number, smooth = true, silent = false) {
+        const slideCount = this.slideIds.length
+
         if (slideCount === 0) {
           return
         }
@@ -222,14 +361,13 @@ export default defineComponent({
         const changed = this.activeIndex !== targetIndex
 
         this.activeIndex = targetIndex
-        this.firstVisibleIndex = targetIndex
-        this.lastVisibleIndex = Math.min(targetIndex + activeSlidesPerView - 1, slideCount - 1)
 
         trackOffset = -(targetIndex * getStepSize())
         applyTransform(trackOffset, smooth)
 
-        if (changed) {
-          announceSlide(targetIndex)
+        if (changed && !silent) {
+          announceSlide(targetIndex, slideCount)
+
           rootEl?.dispatchEvent(new CustomEvent('slidechange', {
             detail: { index: targetIndex },
             bubbles: true,
@@ -246,12 +384,8 @@ export default defineComponent({
       },
 
       startAutoplay() {
-        if (!config.autoplay || autoplayTimer) {
+        if (!config.autoplay || autoplayTimer || !rootEl || destroyed) {
           return
-        }
-
-        if (trackEl) {
-          trackEl.setAttribute('aria-live', 'off')
         }
 
         autoplayTimer = setInterval(() => {
@@ -266,18 +400,26 @@ export default defineComponent({
           clearInterval(autoplayTimer)
           autoplayTimer = null
         }
+      },
 
-        if (trackEl) {
-          trackEl.setAttribute('aria-live', 'polite')
+      pauseAutoplay(source: PauseSource = 'hover') {
+        if (source === 'hover') {
+          this._pausedByHover = true
+        } else if (source === 'focus') {
+          this._pausedByFocus = true
+        } else {
+          this._pausedByDrag = true
         }
       },
 
-      pauseAutoplay() {
-        this.isAutoplayPaused = true
-      },
-
-      resumeAutoplay() {
-        this.isAutoplayPaused = false
+      resumeAutoplay(source: PauseSource = 'hover') {
+        if (source === 'hover') {
+          this._pausedByHover = false
+        } else if (source === 'focus') {
+          this._pausedByFocus = false
+        } else {
+          this._pausedByDrag = false
+        }
       },
 
       onPointerDown(e: PointerEvent) {
@@ -286,6 +428,7 @@ export default defineComponent({
         }
 
         const tag = (e.target as HTMLElement).tagName
+
         if (tag === 'A' || tag === 'BUTTON' || tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') {
           return
         }
@@ -297,6 +440,10 @@ export default defineComponent({
         dragStartX = e.clientX
         dragStartOffset = trackOffset
 
+        if (config.autoplay) {
+          this.pauseAutoplay('drag')
+        }
+
         applyTransform(trackOffset, false)
         e.preventDefault()
       },
@@ -306,18 +453,21 @@ export default defineComponent({
           return
         }
 
-        let newOffset = dragStartOffset + (e.clientX - dragStartX)
+        const slideCount = this.slideIds.length
+        // RTL note: this direction flip maps the screen delta into LTR-logical
+        // sign space (negative = forward through slides). applyTransform then
+        // negates again when rendering, so the same resistance branches below
+        // work for both directions.
+        const direction = isRtl ? -1 : 1
+        let newOffset = dragStartOffset + direction * (e.clientX - dragStartX)
 
-        if (!config.loop && config.resistance) {
-          const max = getMaxOffset()
+        if (config.resistance) {
+          const max = getMaxOffset(slideCount)
           if (newOffset > 0) {
             newOffset = newOffset * 0.3
           } else if (-newOffset > max) {
             newOffset = -(max + (-newOffset - max) * 0.3)
           }
-        } else if (config.loop) {
-          const totalWidth = slideCount * getStepSize()
-          newOffset = Math.max(-totalWidth, Math.min(totalWidth, newOffset))
         }
 
         trackOffset = newOffset
@@ -330,6 +480,7 @@ export default defineComponent({
         }
 
         const target = e.currentTarget as HTMLElement
+
         if (target.hasPointerCapture(e.pointerId)) {
           target.releasePointerCapture(e.pointerId)
         }
@@ -339,16 +490,24 @@ export default defineComponent({
         if (config.freeMode) {
           const step = getStepSize()
           const nearest = step > 0 ? Math.round(-trackOffset / step) : 0
+
           this.goTo(nearest)
         } else {
           const distance = trackOffset - dragStartOffset
-          const direction = distance > 0 ? -1 : 1
+          const step = getStepSize()
 
-          if (Math.abs(distance) > config.threshold) {
-            this.goTo(this.activeIndex + direction)
+          if (Math.abs(distance) > config.threshold && step > 0) {
+            const direction = distance > 0 ? -1 : 1
+            const steps = Math.max(1, Math.round(Math.abs(distance) / step))
+
+            this.goTo(this.activeIndex + direction * steps)
           } else {
             this.goTo(this.activeIndex)
           }
+        }
+
+        if (config.autoplay) {
+          this.resumeAutoplay('drag')
         }
       },
 
@@ -357,91 +516,68 @@ export default defineComponent({
         activeSpaceBetween = config.spaceBetween
 
         for (const { mql, query } of mediaListeners) {
-          if (mql.matches) {
-            const bp = config.breakpoints[query]
-            if (bp) {
-              if (bp.slidesPerView !== undefined) {
-                activeSlidesPerView = bp.slidesPerView
-              }
-              if (bp.spaceBetween !== undefined) {
-                activeSpaceBetween = bp.spaceBetween
-              }
-            }
+          if (!mql.matches) {
+            continue
+          }
+
+          const bp = config.breakpoints[query]
+
+          if (!bp) {
+            continue
+          }
+
+          if (bp.slidesPerView !== undefined) {
+            activeSlidesPerView = bp.slidesPerView
+          }
+
+          if (bp.spaceBetween !== undefined) {
+            activeSpaceBetween = bp.spaceBetween
           }
         }
 
         this._activeSlidesPerView = activeSlidesPerView
+
         updateSlideWidths()
-        this.goTo(this.activeIndex, false)
+        this.goTo(this.activeIndex, false, true)
       },
 
-      registerSlide(): number {
-        const index = slideCount
-        slideCount++
-        this._slideCount = slideCount
-        return index
+      registerSlide(id: string): void {
+        if (!this.slideIds.includes(id)) {
+          this.slideIds.push(id)
+        }
       },
 
-      unregisterSlide() {
-        slideCount--
-        this._slideCount = slideCount
+      unregisterSlide(id: string): void {
+        this.slideIds = this.slideIds.filter((s: string) => s !== id)
       },
 
       isSlideVisible(index: number): boolean {
-        return index >= this.firstVisibleIndex && index <= this.lastVisibleIndex
+        return index >= this.activeIndex && index < this.activeIndex + this._activeSlidesPerView
       },
 
       update(settings: Partial<Props>) {
-        if (settings.autoplay !== undefined) {
+        const autoplayChanging = settings.autoplay !== undefined
+        const speedChanging = settings.speed !== undefined
+        const breakpointsChanging = settings.breakpoints !== undefined
+
+        if (autoplayChanging) {
           this.stopAutoplay()
-          config.autoplay =
-            typeof settings.autoplay === 'object'
-              ? {
-                  delay: settings.autoplay.delay ?? 3000,
-                  pauseOnHover: settings.autoplay.pauseOnHover ?? true,
-                  pauseOnFocus: settings.autoplay.pauseOnFocus ?? true,
-                }
-              : settings.autoplay
-                ? { delay: 3000, pauseOnHover: true, pauseOnFocus: true }
-                : null
-          if (config.autoplay) {
-            this.startAutoplay()
-          }
         }
 
-        if (settings.loop !== undefined) {
-          config.loop = settings.loop
+        assignSettings(config, settings)
+
+        if (speedChanging) {
+          originalSpeed = config.speed
+          applyReducedMotion()
         }
-        if (settings.keyboard !== undefined) {
-          config.keyboard = settings.keyboard
-        }
-        if (settings.draggable !== undefined) {
-          config.draggable = settings.draggable
-        }
-        if (settings.freeMode !== undefined) {
-          config.freeMode = settings.freeMode
-        }
-        if (settings.threshold !== undefined) {
-          config.threshold = settings.threshold
-        }
-        if (settings.resistance !== undefined) {
-          config.resistance = settings.resistance
-        }
-        if (settings.speed !== undefined) {
-          config.speed = settings.speed
-        }
-        if (settings.slidesPerView !== undefined) {
-          config.slidesPerView = Math.max(1, settings.slidesPerView)
-        }
-        if (settings.spaceBetween !== undefined) {
-          config.spaceBetween = settings.spaceBetween
-        }
-        if (settings.breakpoints !== undefined) {
-          config.breakpoints = settings.breakpoints
+
+        if (breakpointsChanging) {
           for (const { mql, handler } of mediaListeners) {
             mql.removeEventListener('change', handler)
           }
+
           mediaListeners = []
+
           for (const query of Object.keys(config.breakpoints)) {
             const mql = window.matchMedia(query)
             const handler = () => this.applyBreakpoints()
@@ -449,8 +585,9 @@ export default defineComponent({
             mediaListeners.push({ mql, query, handler })
           }
         }
-        if (settings.a11y !== undefined) {
-          config.a11y = { ...config.a11y, ...settings.a11y }
+
+        if (autoplayChanging && config.autoplay) {
+          this.startAutoplay()
         }
 
         this.applyBreakpoints()
@@ -458,7 +595,7 @@ export default defineComponent({
 
       init(this: any) {
         rootEl = this.$el as HTMLElement
-        viewportEl = rootEl!.querySelector('[x-carousel\\:viewport]') as HTMLElement
+        viewportEl = rootEl.querySelector('[x-carousel\\:viewport]') as HTMLElement
 
         if (!viewportEl) {
           return
@@ -470,66 +607,73 @@ export default defineComponent({
           return
         }
 
+        destroyed = false
+        isRtl = getComputedStyle(rootEl).direction === 'rtl'
+
         viewportEl.style.overflow = 'hidden'
 
         trackEl.style.display = 'flex'
         trackEl.style.flexShrink = '0'
         trackEl.style.willChange = 'transform'
         trackEl.style.touchAction = 'pan-y'
+
         if (config.draggable) {
           trackEl.style.userSelect = 'none'
         }
+
         trackEl.style.gap = `${activeSpaceBetween}px`
 
-        rafId = requestAnimationFrame(() => {
-          rafId = null
-          if (initialized) {
-            return
-          }
-          initialized = true
-          containerWidth = viewportEl!.clientWidth
+        containerWidth = viewportEl.clientWidth
 
-          for (const query of Object.keys(config.breakpoints)) {
-            const mql = window.matchMedia(query)
-            const handler = () => this.applyBreakpoints()
-            mql.addEventListener('change', handler)
-            mediaListeners.push({ mql, query, handler })
-          }
+        for (const query of Object.keys(config.breakpoints)) {
+          const mql = window.matchMedia(query)
+          const handler = () => this.applyBreakpoints()
+          mql.addEventListener('change', handler)
+          mediaListeners.push({ mql, query, handler })
+        }
 
-          this.applyBreakpoints()
+        this.applyBreakpoints()
 
-          resizeObserver = new ResizeObserver(() => {
-            if (viewportEl) {
-              containerWidth = viewportEl.clientWidth
-              updateSlideWidths()
-              this.goTo(this.activeIndex, false)
-            }
-          })
-          resizeObserver.observe(viewportEl!)
-
-          if (config.autoplay) {
-            this.startAutoplay()
-          }
-
-          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            config.speed = 0
+        resizeObserver = new ResizeObserver(() => {
+          if (viewportEl && !destroyed) {
+            containerWidth = viewportEl.clientWidth
+            updateSlideWidths()
+            this.goTo(this.activeIndex, false, true)
           }
         })
+
+        resizeObserver.observe(viewportEl)
+
+        reducedMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)')
+        reducedMotionHandler = () => applyReducedMotion()
+        reducedMotionMql.addEventListener('change', reducedMotionHandler)
+        applyReducedMotion()
+
+        if (config.autoplay) {
+          this.startAutoplay()
+        }
       },
 
       destroy() {
-        if (rafId) {
-          cancelAnimationFrame(rafId)
-          rafId = null
-        }
+        destroyed = true
+
         this.stopAutoplay()
+
         resizeObserver?.disconnect()
+        resizeObserver = null
 
         for (const { mql, handler } of mediaListeners) {
           mql.removeEventListener('change', handler)
         }
+
         mediaListeners = []
-        initialized = false
+
+        if (reducedMotionMql && reducedMotionHandler) {
+          reducedMotionMql.removeEventListener('change', reducedMotionHandler)
+        }
+
+        reducedMotionMql = null
+        reducedMotionHandler = null
 
         if (viewportEl) {
           viewportEl.style.overflow = ''
@@ -545,6 +689,8 @@ export default defineComponent({
           trackEl.style.transform = ''
           trackEl.style.transition = ''
         }
+
+        lastTransition = ''
       },
     }
   }),
@@ -552,13 +698,21 @@ export default defineComponent({
   parts: ({ withScopes }) =>
     withScopes<CarouselScopes>({
       root(api) {
-        return {
+        const bindings: Record<string, unknown> = {
           id: api.rootId,
           'data-scope': 'carousel',
           'data-part': 'root',
           role: 'region',
           'aria-roledescription': 'carousel',
         }
+
+        if (api._config.labelledBy) {
+          bindings['aria-labelledby'] = api._config.labelledBy
+        } else {
+          bindings['aria-label'] = api._config.label ?? 'Carousel'
+        }
+
+        return bindings
       },
 
       viewport(api) {
@@ -573,19 +727,26 @@ export default defineComponent({
             if (!api._config.keyboard) {
               return
             }
+
+            const prevKey = 'ArrowLeft'
+            const nextKey = 'ArrowRight'
+
             switch (e.key) {
-              case 'ArrowLeft':
+              case prevKey:
                 e.preventDefault()
                 api.prev()
                 break
-              case 'ArrowRight':
+
+              case nextKey:
                 e.preventDefault()
                 api.next()
                 break
+
               case 'Home':
                 e.preventDefault()
                 api.goTo(0)
                 break
+
               case 'End':
                 e.preventDefault()
                 api.goTo(api.totalPages - 1)
@@ -594,22 +755,29 @@ export default defineComponent({
           },
           'x-on:mouseenter'() {
             if (api._config.autoplay?.pauseOnHover) {
-              api.pauseAutoplay()
+              api.pauseAutoplay('hover')
             }
           },
           'x-on:mouseleave'() {
             if (api._config.autoplay?.pauseOnHover) {
-              api.resumeAutoplay()
+              api.resumeAutoplay('hover')
             }
           },
           'x-on:focusin'() {
             if (api._config.autoplay?.pauseOnFocus) {
-              api.pauseAutoplay()
+              api.pauseAutoplay('focus')
             }
           },
-          'x-on:focusout'() {
-            if (api._config.autoplay?.pauseOnFocus) {
-              api.resumeAutoplay()
+          'x-on:focusout'(e: FocusEvent) {
+            if (!api._config.autoplay?.pauseOnFocus) {
+              return
+            }
+
+            const related = e.relatedTarget as Node | null
+            const current = e.currentTarget as Node
+
+            if (!related || !current.contains(related)) {
+              api.resumeAutoplay('focus')
             }
           },
         }
@@ -619,6 +787,7 @@ export default defineComponent({
         return {
           'data-scope': 'carousel',
           'data-part': 'track',
+          'x-bind:aria-live': () => (api._config.autoplay ? 'off' : 'polite'),
           'x-on:pointerdown'(e: PointerEvent) {
             api.onPointerDown(e)
           },
@@ -637,40 +806,48 @@ export default defineComponent({
       slide: defineScope({
         name: 'slide',
 
-        setup(api, _el, { cleanup }) {
-          const index = api.registerSlide()
+        setup(api, el, { generateId, cleanup }) {
+          const id = generateId('slide')
+
+          api.registerSlide(id)
 
           cleanup(() => {
-            api.unregisterSlide()
+            api.unregisterSlide(id)
           })
 
+          const hasUserLabel = el.hasAttribute('aria-label')
+
           return {
-            index,
+            _hasUserLabel: hasUserLabel,
+
+            get index() {
+              return api.slideIds.indexOf(id)
+            },
 
             get isActive() {
-              return api.activeIndex === index
+              return api.activeIndex === this.index
             },
 
             get isPrev() {
-              return api.activeIndex - 1 === index
+              return api.activeIndex - 1 === this.index
             },
 
             get isNext() {
-              return api.activeIndex + 1 === index
+              return api.activeIndex + 1 === this.index
             },
 
             get isVisible() {
-              return api.isSlideVisible(index)
+              return api.isSlideVisible(this.index)
             },
 
             activate() {
-              api.goTo(index)
+              api.goTo(this.index)
             },
           }
         },
 
         bindings(api, scope) {
-          return {
+          const bindings: Record<string, unknown> = {
             'data-scope': 'carousel',
             'data-part': 'slide',
             'x-bind:data-active': () => (scope.isActive ? '' : undefined),
@@ -678,10 +855,17 @@ export default defineComponent({
             'x-bind:data-next': () => (scope.isNext ? '' : undefined),
             'x-bind:data-visible': () => (scope.isVisible ? '' : undefined),
             'x-bind:data-index': () => scope.index,
+            'x-bind:aria-hidden': () => (!scope.isVisible ? 'true' : undefined),
+            'x-bind:inert': () => (!scope.isVisible ? '' : undefined),
             role: 'group',
             'aria-roledescription': 'slide',
-            'x-bind:aria-label': () => `Slide ${scope.index + 1} of ${api.totalSlides}`,
           }
+
+          if (!(scope as { _hasUserLabel: boolean })._hasUserLabel) {
+            bindings['x-bind:aria-label'] = () => `Slide ${scope.index + 1} of ${api.totalSlides}`
+          }
+
+          return bindings
         },
       }),
 
@@ -717,9 +901,30 @@ export default defineComponent({
         name: 'pagination',
 
         setup(api, _el, { value }) {
-          const index = value !== undefined && value !== null && value !== ''
-            ? Number(value)
-            : 0
+          const hasValue = value !== undefined && value !== null && value !== ''
+          const parsed = hasValue ? Number(value) : NaN
+          const valid = hasValue && Number.isFinite(parsed) && parsed >= 0
+
+          if (!valid) {
+            console.warn(
+              '[carousel] x-carousel:pagination requires an explicit non-negative page index value, e.g. x-carousel:pagination="0"',
+            )
+
+            return {
+              index: -1,
+              get isActive() {
+                return false
+              },
+              get label() {
+                return ''
+              },
+              goTo() {
+                // no-op for invalid pagination entry
+              },
+            }
+          }
+
+          const index = parsed
 
           return {
             index,
@@ -733,16 +938,36 @@ export default defineComponent({
             },
 
             goTo() {
+              if (index >= api.totalPages) {
+                console.warn(
+                  `[carousel] x-carousel:pagination="${index}" is out of range (totalPages=${api.totalPages})`,
+                )
+
+                return
+              }
+
               api.goTo(index)
             },
           }
         },
 
-        bindings(_, scope) {
+        bindings(api, scope) {
+          if (scope.index < 0) {
+            return {
+              'data-scope': 'carousel',
+              'data-part': 'pagination',
+              type: 'button',
+              hidden: true,
+              'aria-hidden': 'true',
+              disabled: true,
+            }
+          }
+
           return {
             'data-scope': 'carousel',
             'data-part': 'pagination',
             type: 'button',
+            'aria-controls': api.viewportId,
             'x-on:click'() {
               scope.goTo()
             },
@@ -758,8 +983,6 @@ export default defineComponent({
           'data-scope': 'carousel',
           'data-part': 'pagination-fraction',
           'x-text': () => `${api.pageIndex + 1} / ${api.totalPages}`,
-          'aria-live': 'polite',
-          'aria-atomic': 'true',
         }
       },
 
