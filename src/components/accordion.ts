@@ -8,33 +8,41 @@ interface Props {
   disabled?: boolean
 }
 
+const ITEM_TRIGGER_SELECTOR = '[data-scope="accordion"][data-part="item-trigger"]'
+
 export default defineComponent({
   name: 'accordion',
 
   setup: setup((props: Props, { generateId }) => {
     const rootId = generateId('root')
+    const multiple = props.multiple ?? false
+    const initialValue =
+      !multiple && (props.value?.length ?? 0) > 1
+        ? [props.value![0]!]
+        : props.value ?? []
 
     return {
       rootId,
-      value: props.value ?? [],
-      multiple: props.multiple ?? false,
+      value: initialValue,
+      multiple,
       collapsible: props.collapsible ?? true,
       disabled: props.disabled ?? false,
       focusedValue: null as string | null,
+      itemIds: [] as string[],
 
-      init() {
-        if (!this.multiple && this.value.length > 1 && this.value[0]) {
-          this.value = [this.value[0]]
+      registerItem(id: string) {
+        if (!this.itemIds.includes(id)) {
+          this.itemIds.push(id)
         }
       },
 
-      setValue(newValue: string[]) {
-        const changed = JSON.stringify(this.value) !== JSON.stringify(newValue)
-        this.value = newValue
+      unregisterItem(id: string) {
+        this.itemIds = this.itemIds.filter((itemId: string) => itemId !== id)
+      },
 
-        if (changed) {
-          this.$dispatch('change', { value: newValue })
-        }
+      setValue(newValue: string[]) {
+        this.value = newValue
+        this.$dispatch('change', { value: newValue })
       },
 
       toggle(id: string) {
@@ -70,6 +78,57 @@ export default defineComponent({
           this.$dispatch('focus-change', { value: id })
         }
       },
+
+      handleRootKeydown(event: KeyboardEvent) {
+        if (this.disabled || this.itemIds.length === 0) {
+          return
+        }
+
+        const target = event.target as HTMLElement | null
+        if (!target || !target.matches(ITEM_TRIGGER_SELECTOR)) {
+          return
+        }
+
+        const itemId = target.getAttribute('data-value')
+        if (!itemId) {
+          return
+        }
+
+        const currentIndex = this.itemIds.indexOf(itemId)
+        if (currentIndex === -1) {
+          return
+        }
+
+        let nextIndex = currentIndex
+
+        switch (event.key) {
+          case 'ArrowDown':
+            event.preventDefault()
+            nextIndex = Math.min(currentIndex + 1, this.itemIds.length - 1)
+            break
+          case 'ArrowUp':
+            event.preventDefault()
+            nextIndex = Math.max(currentIndex - 1, 0)
+            break
+          case 'Home':
+            event.preventDefault()
+            nextIndex = 0
+            break
+          case 'End':
+            event.preventDefault()
+            nextIndex = this.itemIds.length - 1
+            break
+          default:
+            return
+        }
+
+        if (nextIndex !== currentIndex) {
+          const nextItemId = this.itemIds[nextIndex] as string
+          const nextTriggerId = `${this.rootId}-trigger-${nextItemId}`
+          const el = document.getElementById(nextTriggerId) as HTMLElement | null
+          el?.focus()
+        }
+      },
     }
   }),
 
@@ -85,53 +144,34 @@ export default defineComponent({
       }
     }>({
       root(api) {
-      return {
-        id: api.rootId,
-        'data-scope': 'accordion',
-        'data-part': 'root',
-        'x-bind:data-disabled': () => (api.disabled ? '' : undefined),
-        'x-on:keydown.down.prevent'(this: any, event: KeyboardEvent) {
-          const triggers = Array.from(this.$el.querySelectorAll('[data-scope="accordion"][data-part="item-trigger"]'))
-          const currentIndex = triggers.findIndex((t: any) => t === event.target)
-          if (currentIndex < triggers.length - 1) {
-            ;(triggers[currentIndex + 1] as HTMLElement).focus()
-          }
-        },
-        'x-on:keydown.up.prevent'(this: any, event: KeyboardEvent) {
-          const triggers = Array.from(this.$el.querySelectorAll('[data-scope="accordion"][data-part="item-trigger"]'))
-          const currentIndex = triggers.findIndex((t: any) => t === event.target)
-          if (currentIndex > 0) {
-            ;(triggers[currentIndex - 1] as HTMLElement).focus()
-          }
-        },
-        'x-on:keydown.home.prevent'(this: any) {
-          const triggers = this.$el.querySelectorAll('[data-scope="accordion"][data-part="item-trigger"]')
-          if (triggers.length > 0) {
-            ;(triggers[0] as HTMLElement).focus()
-          }
-        },
-        'x-on:keydown.end.prevent'(this: any) {
-          const triggers = this.$el.querySelectorAll('[data-scope="accordion"][data-part="item-trigger"]')
-          if (triggers.length > 0) {
-            ;(triggers[triggers.length - 1] as HTMLElement).focus()
-          }
-        },
-      }
-    },
+        return {
+          id: api.rootId,
+          'data-scope': 'accordion',
+          'data-part': 'root',
+          'x-bind:data-disabled': () => (api.disabled ? '' : undefined),
+          'x-on:keydown'(event: KeyboardEvent) {
+            api.handleRootKeydown(event)
+          },
+        }
+      },
 
       item: defineScope({
         name: 'item',
-        setup: (api, _, { value, generateId }) => {
+        setup: (api, _, { value, generateId, cleanup }) => {
           const id = value ?? generateId('item')
-          const disabled = api.disabled
-          const triggerId = generateId('trigger')
-          const contentId = generateId('content')
+          const triggerId = `${api.rootId}-trigger-${id}`
+          const contentId = `${api.rootId}-content-${id}`
+
+          api.registerItem(id)
+          cleanup(() => api.unregisterItem(id))
 
           return {
             id,
-            disabled,
             triggerId,
             contentId,
+            get disabled() {
+              return api.disabled
+            },
             get opened() {
               return api.isOpen(id)
             },
@@ -148,11 +188,20 @@ export default defineComponent({
         }),
       }),
 
+      itemHeader() {
+        return {
+          'data-scope': 'accordion',
+          'data-part': 'item-header',
+          role: 'heading',
+        }
+      },
+
       itemTrigger(api) {
         return {
           'x-bind:id': () => api.$item.triggerId,
           'data-scope': 'accordion',
           'data-part': 'item-trigger',
+          'x-bind:data-value': () => api.$item.id,
           type: 'button',
           'x-bind:aria-controls': () => api.$item.contentId,
           'x-bind:aria-expanded': () => api.$item.opened,
@@ -179,27 +228,25 @@ export default defineComponent({
           'data-scope': 'accordion',
           'data-part': 'item-content',
           role: 'region',
+          'x-bind:aria-labelledby': () => api.$item.triggerId,
           'x-bind:data-state': () => (api.$item.opened ? 'open' : 'closed'),
           'x-bind:data-disabled': () => (api.$item.disabled ? '' : undefined),
           'x-init'(this: any) {
             const el = this.$el as HTMLElement
             let isAnimating = false
 
-            const initialOpen = api.$item.opened
-            if (!initialOpen) {
+            if (!api.$item.opened) {
               el.style.display = 'none'
               el.style.height = '0px'
               el.style.overflow = 'hidden'
             }
 
-            this.$watch(() => api.value, () => {
+            this.$watch(() => api.$item.opened, (isOpen: boolean) => {
               if (isAnimating) {
                 return
               }
 
-              const isOpen = api.$item.opened
               const currentlyVisible = el.style.display !== 'none'
-
               if (isOpen === currentlyVisible) {
                 return
               }
