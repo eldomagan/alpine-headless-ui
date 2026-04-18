@@ -10,21 +10,34 @@ export default defineComponent({
 
   setup: setup((props: Props, { generateId }) => {
     const rootId = generateId('root')
+    const labelId = generateId('label')
+    const inputId = generateId('input')
 
     return {
       rootId,
+      labelId,
+      inputId,
       value: props.value ?? '',
       timeout: props.timeout ?? 3000,
       copied: false,
-      _timeoutId: null as number | null,
+      _timeoutId: null as ReturnType<typeof setTimeout> | null,
 
-      setValue(newValue: string) {
-        this.value = newValue
+      get isSupported(): boolean {
+        return (
+          typeof navigator !== 'undefined' &&
+          typeof navigator.clipboard?.writeText === 'function'
+        )
       },
 
-      async copy() {
+      async copy(): Promise<boolean> {
         if (!this.value) {
-          return
+          return false
+        }
+
+        if (!this.isSupported) {
+          const error = new Error('Clipboard API not available')
+          this.$dispatch('copy-error', { value: this.value, error })
+          return false
         }
 
         try {
@@ -35,15 +48,23 @@ export default defineComponent({
             clearTimeout(this._timeoutId)
           }
 
-          this._timeoutId = window.setTimeout(() => {
+          this._timeoutId = setTimeout(() => {
             this.copied = false
             this._timeoutId = null
           }, this.timeout)
 
           this.$dispatch('copy', { value: this.value, copied: true })
+          return true
         } catch (error) {
-          console.error('Failed to copy to clipboard:', error)
-          this.$dispatch('copy-error', { error })
+          this.$dispatch('copy-error', { value: this.value, error })
+          return false
+        }
+      },
+
+      destroy() {
+        if (this._timeoutId !== null) {
+          clearTimeout(this._timeoutId)
+          this._timeoutId = null
         }
       },
     }
@@ -61,6 +82,7 @@ export default defineComponent({
 
     label(api) {
       return {
+        id: api.labelId,
         'data-scope': 'clipboard',
         'data-part': 'label',
         'x-bind:data-copied': () => (api.copied ? '' : undefined),
@@ -89,19 +111,23 @@ export default defineComponent({
 
     input(api) {
       return {
+        id: api.inputId,
         'data-scope': 'clipboard',
         'data-part': 'input',
-        type: 'text',
+        'aria-labelledby': api.labelId,
         'x-bind:value': () => api.value,
         'x-bind:data-copied': () => (api.copied ? '' : undefined),
-        readonly: true,
       }
     },
 
     indicator(api) {
       return {
+        role: 'status',
+        'aria-live': 'polite',
+        'aria-atomic': 'true',
         'data-scope': 'clipboard',
         'data-part': 'indicator',
+        'x-bind:data-copied': () => (api.copied ? '' : undefined),
         'x-show': () => api.copied,
       }
     },

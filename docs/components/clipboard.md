@@ -140,7 +140,7 @@ Alpine.start()
 | Event | Detail | Description |
 |-------|--------|-------------|
 | `copy` | `{ value: string, copied: boolean }` | Fired when text is successfully copied |
-| `copy-error` | `{ error: Error }` | Fired when clipboard copy fails |
+| `copy-error` | `{ value: string, error: Error }` | Fired when clipboard copy fails |
 
 ## Accessing State
 
@@ -172,11 +172,11 @@ You can access the clipboard API using `$clipboard`:
 ```
 
 **Available properties:**
-- `value` - The text to copy
+- `value` - The text to copy (assignable)
 - `copied` - Whether text was recently copied
 - `timeout` - Timeout duration in ms
-- `setValue(value)` - Update the text value
-- `copy()` - Trigger copy action programmatically
+- `isSupported` - Whether the Clipboard API is available in the current context
+- `copy()` - Trigger copy action programmatically. Returns `Promise<boolean>` (`true` on success)
 
 ## Accessibility
 
