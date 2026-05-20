@@ -115,6 +115,10 @@
     "type": "git",
     "url": "https://github.com/eldomagan/alpine-headless-ui.git"
   },
+  "homepage": "https://github.com/eldomagan/alpine-headless-ui#readme",
+  "bugs": {
+    "url": "https://github.com/eldomagan/alpine-headless-ui/issues"
+  },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4"
   },

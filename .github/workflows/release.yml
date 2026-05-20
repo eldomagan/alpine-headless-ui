@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   release-please:
@@ -22,9 +23,9 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.release.outputs.releases_created == 'true'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
         if: steps.release.outputs.releases_created == 'true'
 
@@ -36,9 +37,6 @@ jobs:
         run: npm run build
         if: steps.release.outputs.releases_created == 'true'
 
-      # Publish to npm
       - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
         if: steps.release.outputs.releases_created == 'true'
