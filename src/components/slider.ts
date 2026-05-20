@@ -270,8 +270,6 @@ export default defineComponent({
   parts: {
     root(api) {
       return {
-        'data-scope': 'slider',
-        'data-part': 'root',
         id: api.rootId,
         ':data-disabled': () => (api._config.disabled ? '' : undefined),
         'data-orientation': api._config.orientation,
@@ -281,15 +279,11 @@ export default defineComponent({
 
     label() {
       return {
-        'data-scope': 'slider',
-        'data-part': 'label',
       }
     },
 
     control(api) {
       return {
-        'data-scope': 'slider',
-        'data-part': 'control',
         'x-on:pointerdown'(event: PointerEvent) {
           api.handleTrackPointerDown(event)
         },
@@ -303,16 +297,12 @@ export default defineComponent({
 
     track() {
       return {
-        'data-scope': 'slider',
-        'data-part': 'track',
       }
     },
 
     range(api) {
       const isHorizontal = api._config.orientation === 'horizontal'
       return {
-        'data-scope': 'slider',
-        'data-part': 'range',
         ':style': () => {
           const start = api.getRangeStart()
           const end = api.getRangeEnd()
@@ -340,8 +330,6 @@ export default defineComponent({
       const isHorizontal = api._config.orientation === 'horizontal'
 
       return {
-        'data-scope': 'slider',
-        'data-part': 'thumb',
         'data-index': index,
         role: 'slider',
         tabindex: api._config.disabled ? -1 : 0,
@@ -387,8 +375,6 @@ export default defineComponent({
 
     output(api) {
       return {
-        'data-scope': 'slider',
-        'data-part': 'output',
         'x-text': () => {
           if (api._isMultiThumb) {
             return api.values.map((v) => api.getThumbAriaValueText(api.values.indexOf(v))).join(' - ')
@@ -404,8 +390,6 @@ export default defineComponent({
       const percentage = ((markerValue - api._config.min) / (api._config.max - api._config.min)) * 100
 
       return {
-        'data-scope': 'slider',
-        'data-part': 'marker',
         'data-value': markerValue,
         ':style': () => {
           if (isHorizontal) {
@@ -431,8 +415,6 @@ export default defineComponent({
       const index = value !== undefined ? Number(value) : 0
 
       return {
-        'data-scope': 'slider',
-        'data-part': 'hidden-input',
         type: 'hidden',
         name: api._config.name ? (api._isMultiThumb ? `${api._config.name}[${index}]` : api._config.name) : undefined,
         value: () => api.values[index] ?? '',

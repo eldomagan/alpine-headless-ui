@@ -74,8 +74,6 @@ export default defineComponent({
     root(api) {
       return {
         id: api.rootId,
-        'data-scope': 'clipboard',
-        'data-part': 'root',
         'x-bind:data-copied': () => (api.copied ? '' : undefined),
       }
     },
@@ -83,24 +81,18 @@ export default defineComponent({
     label(api) {
       return {
         id: api.labelId,
-        'data-scope': 'clipboard',
-        'data-part': 'label',
         'x-bind:data-copied': () => (api.copied ? '' : undefined),
       }
     },
 
     control(api) {
       return {
-        'data-scope': 'clipboard',
-        'data-part': 'control',
         'x-bind:data-copied': () => (api.copied ? '' : undefined),
       }
     },
 
     trigger(api) {
       return {
-        'data-scope': 'clipboard',
-        'data-part': 'trigger',
         type: 'button',
         'x-bind:data-copied': () => (api.copied ? '' : undefined),
         'x-on:click'() {
@@ -112,8 +104,6 @@ export default defineComponent({
     input(api) {
       return {
         id: api.inputId,
-        'data-scope': 'clipboard',
-        'data-part': 'input',
         'aria-labelledby': api.labelId,
         'x-bind:value': () => api.value,
         'x-bind:data-copied': () => (api.copied ? '' : undefined),
@@ -125,8 +115,6 @@ export default defineComponent({
         role: 'status',
         'aria-live': 'polite',
         'aria-atomic': 'true',
-        'data-scope': 'clipboard',
-        'data-part': 'indicator',
         'x-bind:data-copied': () => (api.copied ? '' : undefined),
         'x-show': () => api.copied,
       }

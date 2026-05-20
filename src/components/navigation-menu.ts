@@ -413,8 +413,6 @@ export default defineComponent({
       root(api, el) {
         return {
           id: api.rootId,
-          'data-scope': 'navigation-menu',
-          'data-part': 'root',
           role: 'navigation',
           'aria-label': 'Main',
           'data-orientation': api._config.orientation,
@@ -433,8 +431,6 @@ export default defineComponent({
       list(api) {
         return {
           id: api.listId,
-          'data-scope': 'navigation-menu',
-          'data-part': 'list',
           role: 'menubar',
           'data-orientation': api._config.orientation,
           'x-on:keydown'(event: KeyboardEvent) {
@@ -476,8 +472,6 @@ export default defineComponent({
 
         bindings(api, scope) {
           return {
-            'data-scope': 'navigation-menu',
-            'data-part': 'item',
             'data-value': scope.value,
             role: 'none',
             'x-bind:data-state': () => (scope.isActive ? 'open' : 'closed'),
@@ -494,8 +488,6 @@ export default defineComponent({
 
         return {
           'x-bind:id': () => api.$item.triggerId,
-          'data-scope': 'navigation-menu',
-          'data-part': 'trigger',
           'data-value': itemValue,
           type: 'button',
           role: 'menuitem',
@@ -551,8 +543,6 @@ export default defineComponent({
       // --- POSITIONER ---
       positioner(api, el) {
         return {
-          'data-scope': 'navigation-menu',
-          'data-part': 'positioner',
           'x-bind:style': () => `position: ${api._config.strategy};`,
           'x-show': () => api.isOpen,
           'x-bind:data-state': () => (api.isOpen ? 'open' : 'closed'),
@@ -574,8 +564,6 @@ export default defineComponent({
 
         return {
           id: api.getContentId(itemValue),
-          'data-scope': 'navigation-menu',
-          'data-part': 'content',
           'data-value': itemValue,
           role: 'menu',
           'x-show': () => api.value === itemValue,
@@ -593,8 +581,6 @@ export default defineComponent({
       // --- LINK ---
       link(api) {
         return {
-          'data-scope': 'navigation-menu',
-          'data-part': 'link',
           role: 'menuitem',
           tabindex: -1,
           'x-on:click'() {
@@ -620,8 +606,6 @@ export default defineComponent({
       viewport(api) {
         return {
           id: api.viewportId,
-          'data-scope': 'navigation-menu',
-          'data-part': 'viewport',
           'x-bind:data-state': () => (api.isOpen ? 'open' : 'closed'),
           'x-bind:data-activation-direction': () => api.activationDirection,
         }
@@ -630,8 +614,6 @@ export default defineComponent({
       // --- ARROW (optional) ---
       arrow(api, el) {
         return {
-          'data-scope': 'navigation-menu',
-          'data-part': 'arrow',
           'aria-hidden': 'true',
           style: 'position: absolute;',
           'x-init'() {
@@ -643,8 +625,6 @@ export default defineComponent({
       // --- INDICATOR (optional) ---
       indicator(api) {
         return {
-          'data-scope': 'navigation-menu',
-          'data-part': 'indicator',
           'aria-hidden': 'true',
           'x-bind:data-state': () => (api.$item.isActive ? 'open' : 'closed'),
         }

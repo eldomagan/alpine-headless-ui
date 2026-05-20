@@ -103,8 +103,6 @@ export default defineComponent({
     root(api) {
       return {
         id: api.rootId,
-        'data-scope': 'dialog',
-        'data-part': 'root',
         'x-bind:data-state': () => (api.isOpen ? 'open' : 'closed'),
         'x-on:modal:open.window'(e: CustomEvent<string>) {
           if (api._config.name && api._config.name === e.detail) {
@@ -122,8 +120,6 @@ export default defineComponent({
     trigger(api) {
       return {
         id: api.triggerId,
-        'data-scope': 'dialog',
-        'data-part': 'trigger',
         type: 'button',
         'aria-haspopup': 'dialog',
         'x-bind:aria-expanded': () => api.isOpen,
@@ -136,8 +132,6 @@ export default defineComponent({
     backdrop(api) {
       return {
         id: api.backdropId,
-        'data-scope': 'dialog',
-        'data-part': 'backdrop',
         'x-show': () => api.isOpen,
         'x-on:click'() {
           if (api._config.closeOnInteractOutside) {
@@ -150,8 +144,6 @@ export default defineComponent({
     positioner(api) {
       return {
         id: api.positionerId,
-        'data-scope': 'dialog',
-        'data-part': 'positioner',
         'x-show': () => api.isOpen,
         'x-on:click.self'() {
           if (api._config.closeOnInteractOutside) {
@@ -164,8 +156,6 @@ export default defineComponent({
     content(api, el) {
       return {
         id: api.contentId,
-        'data-scope': 'dialog',
-        'data-part': 'content',
         role: api._config.role,
         'x-bind:aria-modal': () => (api._config.modal ? 'true' : undefined),
         'x-bind:aria-labelledby': () => api.titleId,
@@ -184,23 +174,17 @@ export default defineComponent({
     title(api) {
       return {
         id: api.titleId,
-        'data-scope': 'dialog',
-        'data-part': 'title',
       }
     },
 
     description(api) {
       return {
         id: api.descriptionId,
-        'data-scope': 'dialog',
-        'data-part': 'description',
       }
     },
 
     closeTrigger(api) {
       return {
-        'data-scope': 'dialog',
-        'data-part': 'close-trigger',
         type: 'button',
         'x-on:click'() {
           api.close()

@@ -185,8 +185,6 @@ export default defineComponent({
   parts: {
     root(api) {
       return {
-        'data-scope': 'before-after',
-        'data-part': 'root',
         id: api.rootId,
         ':data-orientation': () => api.orientation,
         ':data-disabled': () => (api.disabled ? '' : undefined),
@@ -206,8 +204,6 @@ export default defineComponent({
 
     before(api) {
       return {
-        'data-scope': 'before-after',
-        'data-part': 'before',
         ':style': () => {
           if (api.orientation === 'horizontal') {
             return {
@@ -228,8 +224,6 @@ export default defineComponent({
 
     after(api) {
       return {
-        'data-scope': 'before-after',
-        'data-part': 'after',
         ':style': () => {
           if (api.orientation === 'horizontal') {
             return {
@@ -250,8 +244,6 @@ export default defineComponent({
 
     separator(api) {
       return {
-        'data-scope': 'before-after',
-        'data-part': 'separator',
         ':data-orientation': () => api.orientation,
         'aria-hidden': 'true',
         ':style': () => {
@@ -278,8 +270,6 @@ export default defineComponent({
 
     handle(api) {
       return {
-        'data-scope': 'before-after',
-        'data-part': 'handle',
         role: 'slider',
         ':tabindex': () => (api.disabled ? -1 : 0),
         ':aria-valuenow': () => Math.round(api.value),

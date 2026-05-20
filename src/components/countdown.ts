@@ -212,8 +212,6 @@ export default defineComponent({
     root(api) {
       return {
         id: api.rootId,
-        'data-scope': 'countdown',
-        'data-part': 'root',
         'x-bind:data-state': () => api.state,
         'x-bind:data-paused': () => (api.isPaused ? '' : undefined),
         'x-bind:data-finished': () => (api.isFinished ? '' : undefined),
@@ -222,8 +220,6 @@ export default defineComponent({
 
     display(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'display',
         'x-bind:data-state': () => api.state,
         'x-bind:data-paused': () => (api.isPaused ? '' : undefined),
         'x-bind:data-finished': () => (api.isFinished ? '' : undefined),
@@ -232,47 +228,35 @@ export default defineComponent({
 
     days(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'days',
         'x-text': () => api.days,
       }
     },
 
     hours(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'hours',
         'x-text': () => api.hours.toString().padStart(2, '0'),
       }
     },
 
     minutes(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'minutes',
         'x-text': () => api.minutes.toString().padStart(2, '0'),
       }
     },
 
     seconds(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'seconds',
         'x-text': () => api.seconds.toString().padStart(2, '0'),
       }
     },
 
     separator() {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'separator',
       }
     },
 
     control(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'control',
         'x-bind:data-state': () => api.state,
         'x-bind:data-paused': () => (api.isPaused ? '' : undefined),
         'x-bind:data-finished': () => (api.isFinished ? '' : undefined),
@@ -281,8 +265,6 @@ export default defineComponent({
 
     actionTrigger(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'action-trigger',
         type: 'button',
         'x-bind:data-state': () => api.state,
         'x-bind:data-paused': () => (api.isPaused ? '' : undefined),
@@ -302,8 +284,6 @@ export default defineComponent({
 
     startTrigger(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'start-trigger',
         type: 'button',
         'x-bind:data-state': () => api.state,
         'x-on:click'() {
@@ -314,8 +294,6 @@ export default defineComponent({
 
     stopTrigger(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'stop-trigger',
         type: 'button',
         'x-bind:data-state': () => api.state,
         'x-bind:data-finished': () => (api.isFinished ? '' : undefined),
@@ -327,8 +305,6 @@ export default defineComponent({
 
     restartTrigger(api) {
       return {
-        'data-scope': 'countdown',
-        'data-part': 'restart-trigger',
         type: 'button',
         'x-bind:data-state': () => api.state,
         'x-on:click'() {

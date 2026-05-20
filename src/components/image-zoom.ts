@@ -120,8 +120,6 @@ export default defineComponent({
   parts: {
     root(api) {
       return {
-        'data-scope': 'image-zoom',
-        'data-part': 'root',
         id: api.rootId,
         ':data-zoom-type': () => api._config.zoomType,
         ':style': () => ({
@@ -135,8 +133,6 @@ export default defineComponent({
 
     image(api, el) {
       return {
-        'data-scope': 'image-zoom',
-        'data-part': 'image',
         'x-init'() {
           api._imageEl = el as HTMLImageElement
         },
@@ -163,8 +159,6 @@ export default defineComponent({
 
     lens(api, el) {
       return {
-        'data-scope': 'image-zoom',
-        'data-part': 'lens',
         'x-init'() {
           api._lensEl = el
         },
@@ -191,8 +185,6 @@ export default defineComponent({
 
     result(api, el) {
       return {
-        'data-scope': 'image-zoom',
-        'data-part': 'result',
         'x-init'() {
           api._resultEl = el
         },

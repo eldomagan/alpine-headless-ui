@@ -700,8 +700,6 @@ export default defineComponent({
       root(api) {
         const bindings: Record<string, unknown> = {
           id: api.rootId,
-          'data-scope': 'carousel',
-          'data-part': 'root',
           role: 'region',
           'aria-roledescription': 'carousel',
         }
@@ -718,8 +716,6 @@ export default defineComponent({
       viewport(api) {
         return {
           id: api.viewportId,
-          'data-scope': 'carousel',
-          'data-part': 'viewport',
           role: 'group',
           'aria-label': 'Carousel',
           tabindex: 0,
@@ -785,8 +781,6 @@ export default defineComponent({
 
       track(api) {
         return {
-          'data-scope': 'carousel',
-          'data-part': 'track',
           'x-bind:aria-live': () => (api._config.autoplay ? 'off' : 'polite'),
           'x-on:pointerdown'(e: PointerEvent) {
             api.onPointerDown(e)
@@ -848,8 +842,6 @@ export default defineComponent({
 
         bindings(api, scope) {
           const bindings: Record<string, unknown> = {
-            'data-scope': 'carousel',
-            'data-part': 'slide',
             'x-bind:data-active': () => (scope.isActive ? '' : undefined),
             'x-bind:data-prev': () => (scope.isPrev ? '' : undefined),
             'x-bind:data-next': () => (scope.isNext ? '' : undefined),
@@ -871,8 +863,6 @@ export default defineComponent({
 
       prevButton(api) {
         return {
-          'data-scope': 'carousel',
-          'data-part': 'prev-button',
           type: 'button',
           'x-on:click'() {
             api.prev()
@@ -885,8 +875,6 @@ export default defineComponent({
 
       nextButton(api) {
         return {
-          'data-scope': 'carousel',
-          'data-part': 'next-button',
           type: 'button',
           'x-on:click'() {
             api.next()
@@ -954,8 +942,6 @@ export default defineComponent({
         bindings(api, scope) {
           if (scope.index < 0) {
             return {
-              'data-scope': 'carousel',
-              'data-part': 'pagination',
               type: 'button',
               hidden: true,
               'aria-hidden': 'true',
@@ -964,8 +950,6 @@ export default defineComponent({
           }
 
           return {
-            'data-scope': 'carousel',
-            'data-part': 'pagination',
             type: 'button',
             'aria-controls': api.viewportId,
             'x-on:click'() {
@@ -980,16 +964,12 @@ export default defineComponent({
 
       paginationFraction(api) {
         return {
-          'data-scope': 'carousel',
-          'data-part': 'pagination-fraction',
           'x-text': () => `${api.pageIndex + 1} / ${api.totalPages}`,
         }
       },
 
       paginationProgress(api) {
         return {
-          'data-scope': 'carousel',
-          'data-part': 'pagination-progress',
           role: 'progressbar',
           'x-bind:aria-valuenow': () => api.progress,
           'aria-valuemin': 0,

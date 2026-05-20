@@ -136,8 +136,6 @@ export default defineComponent({
     root(api) {
       return {
         id: api.rootId,
-        'data-scope': 'rating',
-        'data-part': 'root',
         'x-modelable': 'value',
         'x-bind:data-disabled': () => (api._config.disabled ? '' : undefined),
         'x-bind:data-readonly': () => (api._config.readOnly ? '' : undefined),
@@ -146,8 +144,6 @@ export default defineComponent({
 
     control(api) {
       return {
-        'data-scope': 'rating',
-        'data-part': 'control',
         role: 'radiogroup',
         'aria-label': 'Rating',
         'x-bind:aria-disabled': () => (api._config.disabled ? 'true' : undefined),
@@ -164,8 +160,6 @@ export default defineComponent({
 
     label(api) {
       return {
-        'data-scope': 'rating',
-        'data-part': 'label',
         id: `${api.rootId}-label`,
       }
     },
@@ -174,8 +168,6 @@ export default defineComponent({
       const index = value !== undefined && value !== null && value !== '' ? Number(value) : 1
 
       return {
-        'data-scope': 'rating',
-        'data-part': 'item',
         'data-index': index,
         role: 'radio',
         'aria-label': api._config.translations.itemLabel(index),
@@ -211,8 +203,6 @@ export default defineComponent({
     hiddenInput(api) {
       return {
         id: api.inputId,
-        'data-scope': 'rating',
-        'data-part': 'hidden-input',
         type: 'text',
         hidden: true,
         'x-bind:name': () => api._config.name || undefined,

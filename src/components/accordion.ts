@@ -146,8 +146,6 @@ export default defineComponent({
       root(api) {
         return {
           id: api.rootId,
-          'data-scope': 'accordion',
-          'data-part': 'root',
           'x-bind:data-disabled': () => (api.disabled ? '' : undefined),
           'x-on:keydown'(event: KeyboardEvent) {
             api.handleRootKeydown(event)
@@ -181,8 +179,6 @@ export default defineComponent({
           }
         },
         bindings: (_, scope) => ({
-          'data-scope': 'accordion',
-          'data-part': 'item',
           'x-bind:data-state': () => (scope.opened ? 'open' : 'closed'),
           'x-bind:data-disabled': () => (scope.disabled ? '' : undefined),
         }),
@@ -190,8 +186,6 @@ export default defineComponent({
 
       itemHeader() {
         return {
-          'data-scope': 'accordion',
-          'data-part': 'item-header',
           role: 'heading',
         }
       },
@@ -199,8 +193,6 @@ export default defineComponent({
       itemTrigger(api) {
         return {
           'x-bind:id': () => api.$item.triggerId,
-          'data-scope': 'accordion',
-          'data-part': 'item-trigger',
           'x-bind:data-value': () => api.$item.id,
           type: 'button',
           'x-bind:aria-controls': () => api.$item.contentId,
@@ -225,8 +217,6 @@ export default defineComponent({
       itemContent(api) {
         return {
           'x-bind:id': () => api.$item.contentId,
-          'data-scope': 'accordion',
-          'data-part': 'item-content',
           role: 'region',
           'x-bind:aria-labelledby': () => api.$item.triggerId,
           'x-bind:data-state': () => (api.$item.opened ? 'open' : 'closed'),
@@ -264,8 +254,6 @@ export default defineComponent({
 
       itemIndicator(api) {
         return {
-          'data-scope': 'accordion',
-          'data-part': 'item-indicator',
           'x-bind:data-state': () => (api.$item.opened ? 'open' : 'closed'),
           'x-bind:data-disabled': () => (api.$item.disabled ? '' : undefined),
         }

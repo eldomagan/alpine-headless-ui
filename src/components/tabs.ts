@@ -155,8 +155,6 @@ export default defineComponent({
   parts: {
     root(api) {
       return {
-        'data-scope': 'tabs',
-        'data-part': 'root',
         id: api.rootId,
         ':data-disabled': () => (api._config.disabled ? '' : undefined),
         'data-orientation': api._config.orientation,
@@ -166,8 +164,6 @@ export default defineComponent({
 
     list(api) {
       return {
-        'data-scope': 'tabs',
-        'data-part': 'list',
         id: api.listId,
         role: 'tablist',
         ':aria-orientation': () => api._config.orientation,
@@ -183,8 +179,6 @@ export default defineComponent({
       const contentId = `${api.rootId}-content-${tabId}`
 
       return {
-        'data-scope': 'tabs',
-        'data-part': 'trigger',
         'data-value': tabId,
         id: triggerId,
         role: 'tab',
@@ -215,8 +209,6 @@ export default defineComponent({
       const contentId = `${api.rootId}-content-${tabId}`
 
       return {
-        'data-scope': 'tabs',
-        'data-part': 'content',
         'data-value': tabId,
         id: contentId,
         role: 'tabpanel',
@@ -229,8 +221,6 @@ export default defineComponent({
 
     indicator(_api) {
       return {
-        'data-scope': 'tabs',
-        'data-part': 'indicator',
       }
     },
   },

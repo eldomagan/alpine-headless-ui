@@ -120,8 +120,6 @@ export default defineComponent({
     root(api) {
       return {
         id: api.rootId,
-        'data-scope': 'popover',
-        'data-part': 'root',
         'x-bind:data-state': () => (api.isOpen ? 'open' : 'closed'),
         'x-on:popover:open.window'(e: CustomEvent<string>) {
           if (api._config.name && api._config.name === e.detail) {
@@ -139,8 +137,6 @@ export default defineComponent({
     trigger(api, el) {
       return {
         id: api.triggerId,
-        'data-scope': 'popover',
-        'data-part': 'trigger',
         type: 'button',
         'aria-haspopup': 'dialog',
         'x-bind:aria-expanded': () => api.isOpen,
@@ -157,8 +153,6 @@ export default defineComponent({
     positioner(api, el) {
       return {
         id: api.positionerId,
-        'data-scope': 'popover',
-        'data-part': 'positioner',
         'x-show': () => api.isOpen,
         'x-bind:data-state': () => (api.isOpen ? 'open' : 'closed'),
         'x-init'() {
@@ -170,8 +164,6 @@ export default defineComponent({
     content(api) {
       return {
         id: api.contentId,
-        'data-scope': 'popover',
-        'data-part': 'content',
         role: 'dialog',
         'x-bind:aria-modal': () => (api._config.modal ? 'true' : undefined),
         'x-bind:aria-labelledby': () => api.titleId,
@@ -192,8 +184,6 @@ export default defineComponent({
     arrow(api, el) {
       return {
         id: api.arrowId,
-        'data-scope': 'popover',
-        'data-part': 'arrow',
         'x-init'() {
           api._arrowEl = el
         },
@@ -204,8 +194,6 @@ export default defineComponent({
     arrowTip(api, el) {
       return {
         id: api.arrowTipId,
-        'data-scope': 'popover',
-        'data-part': 'arrow-tip',
         'x-init'() {
           api._arrowTipEl = el
         },
@@ -215,23 +203,17 @@ export default defineComponent({
     title(api) {
       return {
         id: api.titleId,
-        'data-scope': 'popover',
-        'data-part': 'title',
       }
     },
 
     description(api) {
       return {
         id: api.descriptionId,
-        'data-scope': 'popover',
-        'data-part': 'description',
       }
     },
 
     closeTrigger(api) {
       return {
-        'data-scope': 'popover',
-        'data-part': 'close-trigger',
         type: 'button',
         'x-on:click'() {
           api.close()

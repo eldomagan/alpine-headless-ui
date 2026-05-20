@@ -218,8 +218,6 @@ export default defineComponent({
     root(api) {
       return {
         id: api.rootId,
-        'data-scope': 'marquee',
-        'data-part': 'root',
         'x-bind:data-vertical': () => String(api.vertical),
         'x-bind:data-reverse': () => String(api.reverse),
         'x-bind:data-pause-on-hover': () => String(api.pauseOnHover),
@@ -241,8 +239,6 @@ export default defineComponent({
     viewport(api) {
       return {
         id: api.viewportId,
-        'data-scope': 'marquee',
-        'data-part': 'viewport',
         tabindex: api.pauseOnFocus ? '0' : undefined,
         'x-on:mouseenter'() {
           if (api.pauseOnHover) {
@@ -276,23 +272,17 @@ export default defineComponent({
 
     content() {
       return {
-        'data-scope': 'marquee',
-        'data-part': 'content',
       }
     },
 
     item() {
       return {
-        'data-scope': 'marquee',
-        'data-part': 'item',
       }
     },
 
     control(api) {
       return {
         id: api.controlId,
-        'data-scope': 'marquee',
-        'data-part': 'control',
         type: 'button',
         'x-bind:aria-label': () => (api.isPaused ? 'Play' : 'Pause'),
         'x-on:click'() {

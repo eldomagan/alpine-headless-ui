@@ -225,8 +225,6 @@ export default defineComponent({
   parts: {
     root(api) {
       return {
-        'data-scope': 'number-input',
-        'data-part': 'root',
         'x-modelable': 'value',
         'x-bind:data-disabled': () => (api._config.disabled ? '' : undefined),
         'x-bind:data-readonly': () => (api._config.readonly ? '' : undefined),
@@ -236,8 +234,6 @@ export default defineComponent({
 
     label(api) {
       return {
-        'data-scope': 'number-input',
-        'data-part': 'label',
         for: api.inputId,
       }
     },
@@ -245,8 +241,6 @@ export default defineComponent({
     input(api, el) {
       return {
         id: api.inputId,
-        'data-scope': 'number-input',
-        'data-part': 'input',
         type: 'text',
         inputmode: 'decimal',
         role: 'spinbutton',
@@ -280,8 +274,6 @@ export default defineComponent({
     increment(api) {
       return {
         id: api.incrementId,
-        'data-scope': 'number-input',
-        'data-part': 'increment',
         type: 'button',
         tabindex: -1,
         'aria-label': api._config.translations.incrementLabel,
@@ -298,8 +290,6 @@ export default defineComponent({
     decrement(api) {
       return {
         id: api.decrementId,
-        'data-scope': 'number-input',
-        'data-part': 'decrement',
         type: 'button',
         tabindex: -1,
         'aria-label': api._config.translations.decrementLabel,
@@ -321,8 +311,6 @@ export default defineComponent({
       const pixelsPerStep = 10
 
       return {
-        'data-scope': 'number-input',
-        'data-part': 'scrubber',
         'x-bind:data-disabled': () => (api._config.disabled || api._config.readonly ? '' : undefined),
         'x-init'() {
           el.style.cursor = 'ns-resize'

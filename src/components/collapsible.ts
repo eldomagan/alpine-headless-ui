@@ -60,8 +60,6 @@ export default defineComponent({
     root(api) {
       return {
         id: api.rootId,
-        'data-scope': 'collapsible',
-        'data-part': 'root',
         'x-bind:data-state': () => (api.open ? 'open' : 'closed'),
         'x-bind:data-disabled': () => (api.disabled ? '' : undefined),
       }
@@ -70,8 +68,6 @@ export default defineComponent({
     trigger(api) {
       return {
         id: api.triggerId,
-        'data-scope': 'collapsible',
-        'data-part': 'trigger',
         type: 'button',
         'aria-controls': api.contentId,
         'x-bind:aria-expanded': () => api.open,
@@ -87,8 +83,6 @@ export default defineComponent({
     content(api) {
       return {
         id: api.contentId,
-        'data-scope': 'collapsible',
-        'data-part': 'content',
         'x-bind:data-state': () => (api.open ? 'open' : 'closed'),
         'x-bind:data-disabled': () => (api.disabled ? '' : undefined),
         'x-init'(this: typeof api) {
@@ -109,8 +103,6 @@ export default defineComponent({
 
     indicator(api) {
       return {
-        'data-scope': 'collapsible',
-        'data-part': 'indicator',
         'x-bind:data-state': () => (api.open ? 'open' : 'closed'),
         'x-bind:data-disabled': () => (api.disabled ? '' : undefined),
       }
