@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.0](https://github.com/eldomagan/alpine-headless-ui/compare/alpine-headless-ui-v1.3.1...alpine-headless-ui-v1.4.0) (2026-05-20)
+
+
+### Features
+
+* **accordion:** add item-header part and fix a11y/correctness gaps ([d3f1224](https://github.com/eldomagan/alpine-headless-ui/commit/d3f122483551e53e091a552b5bf9049be0139ac4))
+* **carousel:** harden lifecycle and a11y, add label/easing/RTL ([d061e25](https://github.com/eldomagan/alpine-headless-ui/commit/d061e25d72895555f34a605e4ba45553a89ec1c7))
+* **ci:** switch npm release to OIDC trusted publishing with provenance ([356bd6a](https://github.com/eldomagan/alpine-headless-ui/commit/356bd6a00578eddd50e83dac77b7004b40f0d0ff))
+* **clipboard:** harden lifecycle, a11y, and API ([abc2eaa](https://github.com/eldomagan/alpine-headless-ui/commit/abc2eaae6536fa17753fac7a235cb0beda820d71))
+
 ## [1.3.1](https://github.com/eldomagan/alpine-headless-ui/compare/alpine-headless-ui-v1.3.0...alpine-headless-ui-v1.3.1) (2026-04-16)
 
 
